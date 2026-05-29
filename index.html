@@ -12,26 +12,81 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
+    <!-- Import Ethers.js library for Web3 connectivity -->
+    <script src="https://cloudflare.com"></script>
 </head>
 <body>
     <h1 style="text-align: center; margin-bottom: 40px;">🛡️ OPN Shield Escrow</h1>
     <div class="grid">
+        <!-- Card 1: Connection Gateway -->
         <div class="card">
             <h3>Wallet Portal</h3>
-            <p>Status: <span class="status">Connected</span></p>
-            <p style="font-size: 12px; color: #aaa;">Address: 0xfF08...9753</p>
-            <button class="btn">Disconnect Wallet</button>
+            <p>Status: <span id="walletStatus" style="color: #ff3366;">Disconnected</span></p>
+            <p style="font-size: 12px; color: #aaa; word-break: break-all;">Address: <span id="walletAddress">0x...</span></p>
+            <button class="btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
         </div>
+        <!-- Card 2: Interactive Actions -->
         <div class="card">
             <h3>Escrow Actions</h3>
-            <button class="btn" style="margin-bottom: 10px;">🔒 Deposit Secure Funds</button>
-            <button class="btn" style="background: #231b3a; border: 1px solid #8247e5;">🔓 Release To Seller</button>
+            <button class="btn" style="margin-bottom: 10px;" onclick="triggerDeposit()">🔒 Deposit Secure Funds</button>
+            <button class="btn" style="background: #231b3a; border: 1px solid #8247e5;" onclick="triggerRelease()">🔓 Release To Seller</button>
         </div>
+        <!-- Card 3: Metrics Dashboard -->
         <div class="card">
             <h3>Contract Security Metrics</h3>
-            <p>Active System State: <span style="color: #ff3366;">Active / Unpaused</span></p>
-            <p>Total Guarded Vaults: <span class="status">0 Live</span></p>
+            <p>Active System State: <span style="color: #00ffcc;">Active / Unpaused</span></p>
+            <p>Total Guarded Vaults: <span class="status">1 Live</span></p>
         </div>
     </div>
+
+    <script>
+        // CONFIGURATION: Replace with your exact deployed contract address
+        const contractAddress = "0xYOUR_DEPLOYED_CONTRACT_ADDRESS"; 
+        
+        // Simple Application Binary Interface (ABI) for your functions
+        const contractABI = [
+            "function togglePause() external",
+            "function getLockedBalance(address _user) external view returns (uint256)"
+        ];
+
+        let provider, signer, contract;
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    // Request wallet connection from MetaMask
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    const address = await signer.getAddress();
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                    // Update UI Dashboard metrics dynamically
+                    document.getElementById("walletStatus").innerText = "Connected";
+                    document.getElementById("walletStatus").style.color = "#00ffcc";
+                    document.getElementById("walletAddress").innerText = address;
+                    document.getElementById("connectBtn").innerText = "Wallet Linked";
+                } catch (error) {
+                    alert("Connection rejected: " + error.message);
+                }
+            } else {
+                alert("MetaMask extension not found! Please install it to interact.");
+            }
+        }
+
+        async function triggerDeposit() {
+            if (!contract) return alert("Please link your Web3 Wallet portal first!");
+            try {
+                alert("Initiating secure vault transaction interaction...");
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function triggerRelease() {
+            if (!contract) return alert("Please link your Web3 Wallet portal first!");
+            alert("Contacting smart contract access layers to release locked assets...");
+        }
+    </script>
 </body>
 </html>
