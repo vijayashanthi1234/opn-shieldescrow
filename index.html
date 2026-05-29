@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPN ShieldEscrow Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0e17; color: white; text-align: center; padding: 50px 20px; margin: 0; }
+        .container { max-width: 1000px; margin: auto; }
+        h1 { font-size: 3rem; margin-bottom: 10px; color: #3b82f6; letter-spacing: 1px; }
+        .tagline { color: #8a92b2; font-size: 1.2rem; margin-bottom: 50px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-top: 20px; }
+        .card { background: #141a29; padding: 40px 20px; border-radius: 12px; border: 1px solid #1e293b; transition: transform 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: #3b82f6; }
+        .card h3 { font-size: 1.4rem; margin-top: 0; color: #f8fafc; }
+        .card p { color: #64748b; font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px; }
+        .btn { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: background 0.2s; }
+        .btn:hover { background: #1d4ed8; }
+        .status-badge { display: inline-block; background: #10b981; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status-badge">OPN Chain Testnet Live</div>
+        <h1>OPN ShieldEscrow</h1>
+        <p class="tagline">Automated, decentralized escrow smart contracts securing peer-to-peer asset transfers on OPN Chain infrastructure.</p>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>Create Escrow</h3>
+                <p>Lock your digital assets safely into the verified contract vault to initiate a secure transaction track.</p>
+                <a href="#" class="btn">Lock Funds</a>
+            </div>
+            <div class="card">
+                <h3>Release Assets</h3>
+                <p>Authorize safe delivery payments and distribute locked funds straight to the seller trustlessly.</p>
+                <a href="#" class="btn">Confirm Trade</a>
+            </div>
+            <div class="card">
+                <h3>Contract Inspector</h3>
+                <p>Audit system state directly and check status rules deployed under active ledger addresses.</p>
+                <a href="#" class="btn">View Logic</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
