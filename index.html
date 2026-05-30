@@ -39,7 +39,7 @@
     <script>
         let provider, signer;
 
-        // Synchronized with your live OPN Testnet Contract Deployment
+        // Synchronized with your live OPN Testnet Contract Deployment Address
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
@@ -54,7 +54,7 @@
             }
             
             if (!window.ethereum) {
-                return alert("Crypto wallet extension not detected! Please verify MetaMask is installed and unlocked.");
+                return alert("Crypto wallet extension not detected! Please ensure MetaMask is installed, unlocked, and active.");
             }
 
             try {
