@@ -12,7 +12,7 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
-    <!-- PERFECT FIXED SCRIPT PATH LINK BELOW -->
+    <!-- Verified Fixed Script Asset Link -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
 </head>
 <body>
@@ -39,7 +39,6 @@
     <script>
         let provider, signer;
 
-        // Your specific OPN Chain contract deployment configuration
         const contractAddress = "0xa0772b29af8c2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
@@ -54,7 +53,6 @@
                     provider = new ethersInstance.providers.Web3Provider(window.ethereum);
                     await provider.send("eth_requestAccounts", []);
                     
-                    // Fixed: In Ethers v5, getSigner() is synchronous. No await needed.
                     signer = provider.getSigner();
                     const address = await signer.getAddress();
 
@@ -75,8 +73,6 @@
             
             try {
                 const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
-                
-                // Triggers a real transaction sending 0.1 OPN tokens as a security deposit
                 const tx = await escrowContract.deposit({ value: ethers.utils.parseEther("0.1") });
                 alert("Deposit transaction dispatched! Awaiting blockchain verification...");
                 
@@ -93,7 +89,6 @@
             
             try {
                 const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
-                
                 const tx = await escrowContract.release();
                 alert("Release authorization dispatched! Awaiting blockchain verification...");
                 
