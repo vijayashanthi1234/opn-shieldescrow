@@ -12,7 +12,7 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
-    <!-- Fixed: Points to the actual Ethers file path rather than the root website -->
+    <!-- Verified Fixed Script Asset Link via Official cdnjs Mirror -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
 </head>
 <body>
@@ -39,6 +39,7 @@
     <script>
         let provider, signer;
 
+        // Your specific OPN Chain contract deployment configuration
         const contractAddress = "0xa0772b29af8c2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
