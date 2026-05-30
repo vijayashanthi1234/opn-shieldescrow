@@ -12,7 +12,7 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
-    <!-- Verified Fixed Script Asset Link via Official cdnjs Mirror -->
+    <!-- Stable Ethers v5 CDN package -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
 </head>
 <body>
@@ -39,7 +39,7 @@
     <script>
         let provider, signer;
 
-        // Your specific OPN Chain contract deployment configuration
+        // OPN Chain contract configuration
         const contractAddress = "0xa0772b29af8c2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
@@ -72,10 +72,19 @@
         async function triggerDeposit() {
             if (!signer) return alert("Please link your Web3 Wallet portal first!");
             
+            // Fixed: Prompts for any valid, dynamic user custom amount choice
+            const userAmount = prompt("Enter the amount of OPN to lock in escrow:", "1.0");
+            
+            if (!userAmount || isNaN(userAmount) || parseFloat(userAmount) <= 0) {
+                return alert("Please enter a valid amount greater than 0.");
+            }
+
             try {
                 const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
-                const tx = await escrowContract.deposit({ value: ethers.utils.parseEther("0.1") });
-                alert("Deposit transaction dispatched! Awaiting blockchain verification...");
+                
+                // Dynamically converts custom input string directly to Wei units
+                const tx = await escrowContract.deposit({ value: ethers.utils.parseEther(userAmount) });
+                alert(`Deposit transaction for ${userAmount} OPN sent! Awaiting verification...`);
                 
                 await tx.wait();
                 alert("Success! Funds safely locked within Shield Escrow Vault.");
@@ -90,6 +99,7 @@
             
             try {
                 const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
+                
                 const tx = await escrowContract.release();
                 alert("Release authorization dispatched! Awaiting blockchain verification...");
                 
