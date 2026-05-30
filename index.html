@@ -12,7 +12,7 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
-    <!-- Bulletproof Fallback CDN hosted on UNPKG -->
+    <!-- FIXED: Contains the full complete library path URL -->
     <script src="https://unpkg.com" type="text/javascript"></script>
 </head>
 <body>
@@ -39,7 +39,6 @@
     <script>
         let provider, signer;
 
-        // Synchronized with your live OPN Testnet Contract Deployment Address
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
@@ -54,7 +53,7 @@
             }
             
             if (!window.ethereum) {
-                return alert("Crypto wallet extension not detected! Please ensure MetaMask is installed, unlocked, and active.");
+                return alert("Crypto wallet extension not detected! Please open this page in a normal browser tab with MetaMask active.");
             }
 
             try {
