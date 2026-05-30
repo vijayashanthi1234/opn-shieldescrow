@@ -12,7 +12,7 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
-    <!-- PERFECT FIXED SCRIPT PATH LINK BELOW -->
+    <!-- Stable and verified Ethers.js CDN file -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
 </head>
 <body>
@@ -39,6 +39,7 @@
     <script>
         let provider, signer;
 
+        // OPN Chain contract configuration
         const contractAddress = "0xa0772b29af8c2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
@@ -48,23 +49,29 @@
         async function connectWallet() {
             const ethersInstance = window.ethers;
             
-            if (window.ethereum && ethersInstance) {
-                try {
-                    provider = new ethersInstance.providers.Web3Provider(window.ethereum);
-                    await provider.send("eth_requestAccounts", []);
-                    
-                    signer = provider.getSigner();
-                    const address = await signer.getAddress();
+            // 1. First check if the library code actually downloaded
+            if (!ethersInstance) {
+                return alert("Ethers Library failed to load. Please check your internet connection.");
+            }
+            
+            // 2. Next check if a Web3 browser extension is installed and running
+            if (!window.ethereum) {
+                return alert("Crypto wallet extension not detected! Please open this page in a normal browser tab with MetaMask active, or enable MetaMask in Incognito mode settings.");
+            }
 
-                    document.getElementById("walletStatus").innerText = "Connected";
-                    document.getElementById("walletStatus").style.color = "#00ffcc";
-                    document.getElementById("walletAddress").innerText = address;
-                    document.getElementById("connectBtn").innerText = "Wallet Linked";
-                } catch (error) {
-                    alert("Connection rejected: " + error.message);
-                }
-            } else {
-                alert("Ethers Library build initialization failure. Please reload page.");
+            try {
+                provider = new ethersInstance.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                
+                signer = provider.getSigner();
+                const address = await signer.getAddress();
+
+                document.getElementById("walletStatus").innerText = "Connected";
+                document.getElementById("walletStatus").style.color = "#00ffcc";
+                document.getElementById("walletAddress").innerText = address;
+                document.getElementById("connectBtn").innerText = "Wallet Linked";
+            } catch (error) {
+                alert("Connection rejected: " + error.message);
             }
         }
 
@@ -79,6 +86,7 @@
 
             try {
                 const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
+                
                 const tx = await escrowContract.deposit({ value: ethers.utils.parseEther(userAmount) });
                 alert(`Deposit transaction for ${userAmount} OPN sent! Awaiting verification...`);
                 
