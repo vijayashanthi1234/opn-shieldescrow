@@ -12,8 +12,8 @@
         .btn:hover { background: #9662ea; }
         .status { color: #00ffcc; font-weight: bold; }
     </style>
-    <!-- Modern Ethers v6 Library Package for exact browser compatibility -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Stable fallback production layout bundle configuration build -->
+    <script src="https://jsdelivr.net" type="text/javascript"></script>
 </head>
 <body>
     <h1 style="text-align: center; margin-bottom: 40px;">🛡️ OPN Shield Escrow</h1>
@@ -40,12 +40,14 @@
         let provider, signer;
 
         async function connectWallet() {
-            if (window.ethereum) {
+            // Read direct package namespaces for perfect v5 framework detection
+            const ethersInstance = window.ethers;
+            
+            if (window.ethereum && ethersInstance) {
                 try {
-                    // Modern connection layout compatible with recent MetaMask inject packages
-                    provider = new ethers.BrowserProvider(window.ethereum);
+                    provider = new ethersInstance.providers.Web3Provider(window.ethereum);
                     await provider.send("eth_requestAccounts", []);
-                    signer = await provider.getSigner();
+                    signer = provider.getSigner();
                     const address = await signer.getAddress();
 
                     document.getElementById("walletStatus").innerText = "Connected";
@@ -56,7 +58,7 @@
                     alert("Connection rejected: " + error.message);
                 }
             } else {
-                alert("MetaMask extension not found! Please ensure it is active.");
+                alert("Ethers Library build initialization failure. Please reload page.");
             }
         }
 
