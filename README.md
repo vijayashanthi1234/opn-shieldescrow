@@ -1,3 +1,26 @@
+# OPN Shield Escrow 🛡️
+
+OPN Shield Escrow is a secure, decentralized smart contract protocol designed to facilitate trustless, peer-to-peer digital commerce on the OPN Chain. By locking transactional collateral safely in automated blockchain vaults, it protects buyers and sellers from fraud, rugpulls, and counterparty risks.
+
+Built explicitly for the **IOPn Builders Program (Stage 1 Review)**.
+
+---
+
+## 🚀 Live Protocol Infrastructure
+- **Deployed Testnet Contract Address:** `0xa0772b29af8c2538DDfF50Ae72DA61Ab4725536A`
+- **Target Network:** OPN Testnet
+- **Live Frontend Interface:** [https://github.io](https://github.io)
+
+---
+
+## 🛠️ Core Functional Architecture
+
+The protocol completely mitigates trust barriers by dividing transactional security phases into distinct automated steps:
+
+
+1. **🔒 Secure Deposit (`deposit`):** The Buyer initiates a purchase state by committing funds into the escrow smart contract. The tokens remain securely locked inside the ledger runtime environment, completely inaccessible to any outside party.
+2. **🔓 Escrow Release (`release`):** Once physical or digital products are successfully received and confirmed by the Buyer, the Buyer triggers the release sequence. The contract instantly settles and dispatches the locked assets over the OPN Chain directly to the designated Seller.
+
 ---
 
 ## 🗺️ Project Development Roadmap & Milestones
