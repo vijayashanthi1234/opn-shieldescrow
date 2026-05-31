@@ -183,32 +183,23 @@
         ];
 
         async function connectWallet() {
-            let ethProvider = window.ethereum;
-
-            // Address Brave Browser multi-provider interference frameworks
-            if (window.ethereum && window.ethereum.providers) {
-                ethProvider = window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum.providers[0];
-            }
-
-            if (typeof ethProvider !== 'undefined') {
+            if (typeof window.ethereum !== 'undefined') {
                 try {
-                    const connectBtn = document.getElementById('connectBtn');
-                    connectBtn.innerText = "Requesting Clearance...";
+                    // Core Fix: Use direct wrapper instantiation first to clear empty window arrays
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
                     
-                    const accounts = await ethProvider.request({ method: 'eth_requestAccounts' });
+                    // Force account connection prompt using direct Ethers RPC send method
+                    const accounts = await provider.send("eth_requestAccounts", []);
                     
                     if (!accounts || accounts.length === 0) {
                         alert("No active address structure located.");
-                        connectBtn.innerText = "Establish Connection";
                         return;
                     }
 
-                    // Strict index parsing selection to guarantee text output conversion
                     const activeAccount = accounts[0]; 
-
-                    provider = new ethers.providers.Web3Provider(ethProvider);
                     signer = provider.getSigner();
 
+                    // Instantly push variables to UI elements
                     document.getElementById('walletAddress').innerText = activeAccount;
                     
                     const statusText = document.getElementById('walletStatus');
@@ -216,14 +207,14 @@
                     statusText.style.color = "var(--neon-green)";
 
                     document.getElementById('indStatus').className = "indicator ind-active";
-                    connectBtn.innerText = "Connection Established";
-                    connectBtn.disabled = true;
+                    document.getElementById('connectBtn').innerText = "Connection Established";
+                    document.getElementById('connectBtn').disabled = true;
+
+                    console.log("Secure Session Anchored to Account:", activeAccount);
 
                 } catch (error) {
                     console.error("Connection Routing Error:", error);
-                    const connectBtn = document.getElementById('connectBtn');
-                    connectBtn.innerText = "Establish Connection";
-                    alert("Connection Stopped: " + (error.message || "Interception occurred. Please unlock wallet manually."));
+                    alert("Connection Stopped: " + (error.message || "Interception occurred."));
                 }
             } else {
                 alert("MetaMask client environment missing.");
@@ -248,3 +239,14 @@
         async function triggerRelease() {
             if (!signer) { return alert("Please establish connection first."); }
             try {
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const tx = await contract.release();
+                await tx.wait();
+                alert("Settlement released!");
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
