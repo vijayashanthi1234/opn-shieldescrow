@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
-    <!-- Verified Stable Production CDN for Ethers.js -->
-    <script src="https://cloudflare.com" type="text/javascript"></script>
-    
     <style>
         :root {
             --bg-main: #06040a;
@@ -174,79 +171,75 @@
         </div>
     </div>
 
+    <!-- The Ethers library script is moved here to ensure the HTML skeleton renders first -->
+    <script src="https://cloudflare.com" type="text/javascript"></script>
+
     <script>
-        let provider, signer;
+        let userAddress = null;
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
             "function release() external"
         ];
 
+        // Native JavaScript implementation - 100% independent of Ethers library loading state
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // Core Fix: Use direct wrapper instantiation first to clear empty window arrays
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    
-                    // Force account connection prompt using direct Ethers RPC send method
-                    const accounts = await provider.send("eth_requestAccounts", []);
+                    const connectBtn = document.getElementById('connectBtn');
+                    connectBtn.innerText = "Connecting...";
+
+                    // Request account array structure directly from the browser window object
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
                     if (!accounts || accounts.length === 0) {
-                        alert("No active address structure located.");
+                        alert("No active accounts found.");
+                        connectBtn.innerText = "Establish Connection";
                         return;
                     }
 
-                    const activeAccount = accounts[0]; 
-                    signer = provider.getSigner();
+                    userAddress = accounts[0]; 
 
-                    // Instantly push variables to UI elements
-                    document.getElementById('walletAddress').innerText = activeAccount;
+                    // Instantly push the wallet string value directly to visual element blocks
+                    document.getElementById('walletAddress').innerText = userAddress;
                     
                     const statusText = document.getElementById('walletStatus');
                     statusText.innerText = "Connected";
                     statusText.style.color = "var(--neon-green)";
 
                     document.getElementById('indStatus').className = "indicator ind-active";
-                    document.getElementById('connectBtn').innerText = "Connection Established";
-                    document.getElementById('connectBtn').disabled = true;
+                    connectBtn.innerText = "Connection Established";
+                    connectBtn.disabled = true;
 
-                    console.log("Secure Session Anchored to Account:", activeAccount);
+                    console.log("Connected Successfully via Native Bridge:", userAddress);
 
                 } catch (error) {
-                    console.error("Connection Routing Error:", error);
-                    alert("Connection Stopped: " + (error.message || "Interception occurred."));
+                    console.error("Connection Error Details:", error);
+                    document.getElementById('connectBtn').innerText = "Establish Connection";
+                    alert("Connection Interrupted: " + (error.message || "User declined interface authorization request."));
                 }
             } else {
-                alert("MetaMask client environment missing.");
+                alert("MetaMask client application environment not found.");
             }
         }
 
         async function triggerDeposit() {
-            if (!signer) { return alert("Please establish connection first."); }
+            if (!userAddress) { return alert("Please establish connection first."); }
+            if (typeof ethers === 'undefined') { return alert("Ethers library is still loading from CDN. Please wait 5 seconds."); }
             try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                
                 const depositAmount = prompt("Enter collateral volume to deposit:", "0.1");
                 if (!depositAmount) return;
 
                 const tx = await contract.deposit({ value: ethers.utils.parseEther(depositAmount) });
                 await tx.wait();
-                alert("Deposit finalized!");
+                alert("Deposit finalized successfully!");
             } catch (error) {
                 console.error(error);
+                alert("Transaction tracking aborted.");
             }
         }
 
-        async function triggerRelease() {
-            if (!signer) { return alert("Please establish connection first."); }
-            try {
-                const contract = new ethers.Contract(contractAddress, contractABI, signer);
-                const tx = await contract.release();
-                await tx.wait();
-                alert("Settlement released!");
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    </script>
-</body>
-</html>
