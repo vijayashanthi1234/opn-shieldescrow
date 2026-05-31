@@ -3,42 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPN Shield Escrow Dashboard</title>
+    <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
+    <!-- Modern Tech Typography -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    
     <style>
-        body { background-color: #0b0813; color: #ffffff; font-family: 'Segoe UI', sans-serif; padding: 40px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .card { background: #130f22; border: 1px solid #231b3a; padding: 24px; border-radius: 12px; }
-        .btn { background: #8247e5; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
-        .btn:hover { background: #9662ea; }
-        .status { color: #00ffcc; font-weight: bold; }
+        :root {
+            --bg-main: #06040a;
+            --card-bg: rgba(15, 11, 28, 0.7);
+            --border-color: rgba(130, 71, 229, 0.2);
+            --border-glow: rgba(130, 71, 229, 0.4);
+            --primary-accent: #8247e5;
+            --primary-hover: #9662ea;
+            --text-main: #f3f1f6;
+            --text-muted: #8b8698;
+            --neon-green: #00ffcc;
+            --neon-red: #ff3366;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            min-height: 100vh;
+            padding: 60px 20px;
+            /* Cyberpunk subtle matrix mesh grid background effect */
+            background-image: 
+                linear-gradient(rgba(130, 71, 229, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(130, 71, 229, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 50px; }
+        
+        header h1 { 
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 30%, var(--primary-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Professional Bento Layout Alignment */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(12, 1fr); 
+            gap: 24px; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 30px; 
+            border-radius: 16px; 
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-glow);
+            box-shadow: 0 12px 40px 0 rgba(130, 71, 229, 0.15);
+        }
+
+        .card:hover::before { transform: translateX(100%); }
+
+        /* Custom Card Width Scaling */
+        .col-5 { grid-column: span 5; }
+        .col-7 { grid-column: span 7; }
+        .col-12 { grid-column: span 12; }
+
+        @media (max-width: 850px) { .card { grid-column: span 12 !important; } }
+
+        h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 20px; color: #fff; letter-spacing: -0.3px; }
+
+        .meta-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .meta-value { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; }
+        
+        .address-box {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-hover);
+            border: 1px solid rgba(255,255,255,0.05);
+            word-break: break-all;
+        }
+
+        .btn { 
+            background: var(--primary-accent); 
+            color: #fff; 
+            border: none; 
+            padding: 14px 28px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            width: 100%; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(130, 71, 229, 0.2);
+        }
+        
+        .btn:hover { 
+            background: var(--primary-hover); 
+            transform: scale(1.01);
+            box-shadow: 0 6px 20px rgba(130, 71, 229, 0.4);
+        }
+
+        .btn-outline {
+            background: rgba(35, 27, 58, 0.4);
+            border: 1px solid var(--primary-accent);
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: rgba(130, 71, 229, 0.1);
+        }
+
+        .flex-buttons { display: flex; flex-direction: column; gap: 14px; }
+        
+        .indicator {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .ind-active { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+        .ind-disconnected { background-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
     </style>
-    <!-- FIXED: Contains the full complete library path URL -->
+
     <script src="https://unpkg.com" type="text/javascript"></script>
 </head>
 <body>
-    <h1 style="text-align: center; margin-bottom: 40px;">🛡️ OPN Shield Escrow</h1>
-    <div class="grid">
-        <div class="card">
-            <h3>Wallet Portal</h3>
-            <p>Status: <span id="walletStatus" style="color: #ff3366;">Disconnected</span></p>
-            <p style="font-size: 12px; color: #aaa; word-break: break-all;">Address: <span id="walletAddress">0x...</span></p>
-            <button class="btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
-        </div>
-        <div class="card">
-            <h3>Escrow Actions</h3>
-            <button class="btn" style="margin-bottom: 10px;" onclick="triggerDeposit()">🔒 Deposit Secure Funds</button>
-            <button class="btn" style="background: #231b3a; border: 1px solid #8247e5;" onclick="triggerRelease()">🔓 Release To Seller</button>
-        </div>
-        <div class="card">
-            <h3>Contract Security Metrics</h3>
-            <p>Active System State: <span style="color: #00ffcc;">Active / Unpaused</span></p>
-            <p>Total Guarded Vaults: <span class="status">1 Live</span></p>
+    <div class="container">
+        <header>
+            <h1>🛡️ OPN Shield Escrow</h1>
+            <p>Institutional Peer-to-Peer Settlement Protocol</p>
+        </header>
+
+        <div class="grid">
+            <!-- Card 1: Wallet Portal Setup (Col 5) -->
+            <div class="card col-5">
+                <h3>System Access</h3>
+                <div class="meta-label">Network Authority</div>
+                <div class="meta-value"><span id="indStatus" class="indicator ind-disconnected"></span><span id="walletStatus" style="color: var(--neon-red);">Disconnected</span></div>
+                
+                <div class="meta-label">Security Signature Address</div>
+                <div class="address-box" id="walletAddress">0x...</div>
+                
+                <button class="btn" id="connectBtn" onclick="connectWallet()" style="margin-top: 24px;">Establish Connection</button>
+            </div>
+
+            <!-- Card 2: Escrow Actions Framework (Col 7) -->
+            <div class="card col-7">
+                <h3>Protocol Execution Vault</h3>
+                <div class="flex-buttons" style="margin-top: 10px;">
+                    <div>
+                        <div class="meta-label">Action 01</div>
+                        <button class="btn" onclick="triggerDeposit()">Initialize Collateral Deposit</button>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div class="meta-label">Action 02</div>
+                        <button class="btn btn-outline" onclick="triggerRelease()">Authorize Asset Settlement Release</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Metrics Banner Layer (Col 12) -->
+            <div class="card col-12" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <div class="meta-label">Contract Security Vector</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--neon-green);">ACTIVE // ARCHITECTURE UNPAUSED</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="meta-label">Monitored Ledger Infrastructure</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #fff;">1 Cryptographic Vault Active</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let provider, signer;
-
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
@@ -47,68 +214,28 @@
 
         async function connectWallet() {
             const ethersInstance = window.ethers;
-            
-            if (!ethersInstance) {
-                return alert("Ethers Library failed to load. Please try refreshing or using a different browser.");
-            }
-            
-            if (!window.ethereum) {
-                return alert("Crypto wallet extension not detected! Please open this page in a normal browser tab with MetaMask active.");
-            }
+            if (!ethersInstance) return alert("Ethers Library module missing.");
+            if (!window.ethereum) return alert("Web3 Provider missing. Please install a hardware or software wallet connector plugin.");
 
             try {
                 provider = new ethersInstance.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
-                
                 signer = provider.getSigner();
                 const address = await signer.getAddress();
 
-                document.getElementById("walletStatus").innerText = "Connected";
-                document.getElementById("walletStatus").style.color = "#00ffcc";
+                document.getElementById("walletStatus").innerText = "AUTHORIZED INTERFACE";
+                document.getElementById("walletStatus").style.color = "var(--neon-green)";
+                document.getElementById("indStatus").className = "indicator ind-active";
                 document.getElementById("walletAddress").innerText = address;
-                document.getElementById("connectBtn").innerText = "Wallet Linked";
+                document.getElementById("connectBtn").innerText = "Secure Node Linked";
+                document.getElementById("connectBtn").style.background = "rgba(0, 255, 204, 0.1)";
+                document.getElementById("connectBtn").style.border = "1px solid var(--neon-green)";
+                document.getElementById("connectBtn").style.color = "var(--neon-green)";
             } catch (error) {
-                alert("Connection rejected: " + error.message);
+                alert("Connection failed: " + error.message);
             }
         }
 
         async function triggerDeposit() {
-            if (!signer) return alert("Please link your Web3 Wallet portal first!");
-            
-            const userAmount = prompt("Enter the amount of OPN to lock in escrow:", "1.0");
-            
-            if (!userAmount || isNaN(userAmount) || parseFloat(userAmount) <= 0) {
-                return alert("Please enter a valid amount greater than 0.");
-            }
-
-            try {
-                const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
-                const tx = await escrowContract.deposit({ value: ethers.utils.parseEther(userAmount) });
-                alert(`Deposit transaction for ${userAmount} OPN sent! Awaiting verification...`);
-                
-                await tx.wait();
-                alert("Success! Funds safely locked within Shield Escrow Vault.");
-            } catch (error) {
-                console.error(error);
-                alert("Transaction failed: " + error.message);
-            }
-        }
-
-        async function triggerRelease() {
-            if (!signer) return alert("Please link your Web3 Wallet portal first!");
-            
-            try {
-                const escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
-                const tx = await escrowContract.release();
-                alert("Release authorization dispatched! Awaiting blockchain verification...");
-                
-                await tx.wait();
-                alert("Success! Escrowed funds have been safely transferred to the seller.");
-            } catch (error) {
-                console.error(error);
-                alert("Transaction failed: " + error.message);
-            }
-        }
-    </script>
-</body>
-</html>
+            if (!signer) return alert("Please establish a connection node sequence first.");
+            const userAmount = prompt("Quantify OPN denomination allocation to commit inside escrow:", "1.0");
