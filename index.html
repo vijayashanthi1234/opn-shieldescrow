@@ -209,15 +209,13 @@
             "function deposit() external payable",
             "function release() external"
         ];
-
-        const OPN_TESTNET_PARAMS = {
+                const OPN_TESTNET_PARAMS = {
             chainId: "0x2bf7", 
             chainName: "OPN Testnet",
             nativeCurrency: { name: "OPN Token", symbol: "OPN", decimals: 18 },
-            rpcUrls: ["https://iopn.tech"], 
-            blockExplorerUrls: ["https://iopn.tech"]
+            rpcUrls: ["https://testnet-rpc.iopn.tech"], 
+            blockExplorerUrls: ["https://testnet.iopn.tech"]
         };
-
         // Utility to inject visual log statements dynamically onto the interface card
         function logStatus(message, type = 'neutral') {
             const terminal = document.getElementById('logTerminal');
