@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
-    <!-- Primary Ethers Library CDN Hook -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="text/javascript"></script>
+    <!-- Primary Ethers Library CDN -->
+    <script src="https://cloudflare.com" type="text/javascript"></script>
     
     <style>
         :root {
@@ -176,21 +176,42 @@
 
     <script>
         let userAddress = null;
+        // Your current deployed escrow contract on OPN Chain
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
             "function release() external"
         ];
 
-        // Backup plan if primary cdnjs node fails to load
-        window.addEventListener('load', () => {
-            if (typeof ethers === 'undefined') {
-                console.log("cdnjs failed. Deploying backup jsDelivr library mirror...");
-                const backupScript = document.createElement('script');
-                backupScript.src = "https://jsdelivr.net";
-                document.head.appendChild(backupScript);
+        // Hackathon Criteria Upgrade: Auto-switch network routine to OPN Testnet
+        const OPN_TESTNET_PARAMS = {
+            chainId: "0x2bf7", // Change this to match your OPN chain ID in hex format
+            chainName: "OPN Testnet",
+            nativeCurrency: { name: "OPN Token", symbol: "OPN", decimals: 18 },
+            rpcUrls: ["https://iopn.tech"], // Change this to your exact RPC node endpoint
+            blockExplorerUrls: ["https://iopn.tech"]
+        };
+
+        async function enforceNetwork() {
+            if (!window.ethereum) return;
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: OPN_TESTNET_PARAMS.chainId }],
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [OPN_TESTNET_PARAMS],
+                        });
+                    } catch (addError) {
+                        console.error("Could not append custom RPC node:", addError);
+                    }
+                }
             }
-        });
+        }
 
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
@@ -198,9 +219,10 @@
                     const connectBtn = document.getElementById('connectBtn');
                     connectBtn.innerText = "Connecting...";
 
-                    // Get accounts directly via native browser implementation (bypasses ethers completely)
+                    // Execute automated network checkpoint
+                    await enforceNetwork();
+
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
                     if (!accounts || accounts.length === 0) {
                         alert("No active accounts found.");
                         connectBtn.innerText = "Establish Connection";
@@ -209,37 +231,23 @@
 
                     userAddress = accounts[0]; 
 
-                    // Update UI elements smoothly
                     document.getElementById('walletAddress').innerText = userAddress;
-                    
                     const statusText = document.getElementById('walletStatus');
-                    statusText.innerText = "Connected";
+                    statusText.innerText = "Connected (OPN Chain)";
                     statusText.style.color = "var(--neon-green)";
 
                     document.getElementById('indStatus').className = "indicator ind-active";
                     connectBtn.innerText = "Connection Established";
                     connectBtn.disabled = true;
 
-                    console.log("Account Linked Successfully:", userAddress);
-
+                    console.log("Session verified for account:", userAddress);
                 } catch (error) {
-                    console.error("Connection Error Details:", error);
+                    console.error(error);
                     document.getElementById('connectBtn').innerText = "Establish Connection";
-                    alert("Connection Refused: " + (error.message || "Interception occurred."));
+                    alert("Connection Stopped: Unlock wallet and clear pending requests.");
                 }
             } else {
-                alert("MetaMask client application environment not found.");
+                alert("MetaMask environment not found.");
             }
         }
-
-        async function triggerDeposit() {
-            if (!userAddress) { return alert("Please establish connection first."); }
-            if (typeof ethers === 'undefined') { return alert("The Ethers library is still downloading. Please try again in 5 seconds."); }
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, contractABI, signer);
-                
-                const depositAmount = prompt("Enter collateral volume to deposit:", "0.1");
-                if (!depositAmount) return;
 
