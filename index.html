@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
-    <!-- Primary Ethers Library CDN -->
+    <!-- Stable Production CDN for Ethers.js -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
     
     <style>
@@ -142,7 +142,8 @@
                 </div>
                 
                 <div class="meta-label">Security Signature Address</div>
-                <div class="address-box" id="walletAddress">0x...</div>
+                <!-- YOUR WALLET ADDRESS IS PRE-LOADED HERE -->
+                <div class="address-box" id="walletAddress">0xF10B286940e6Aa72b8EAC394b3259A06eF239753</div>
                 
                 <button class="btn" id="connectBtn" onclick="connectWallet()" style="margin-top: 24px;">Establish Connection</button>
             </div>
@@ -175,20 +176,21 @@
     </div>
 
     <script>
-        let userAddress = null;
-        // Your current deployed escrow contract on OPN Chain
+        let provider, signer;
+        // Hardcoded developer wallet tracking index
+        let userAddress = "0xF10B286940e6Aa72b8EAC394b3259A06eF239753"; 
+        
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
             "function release() external"
         ];
 
-        // Hackathon Criteria Upgrade: Auto-switch network routine to OPN Testnet
         const OPN_TESTNET_PARAMS = {
-            chainId: "0x2bf7", // Change this to match your OPN chain ID in hex format
+            chainId: "0x2bf7", 
             chainName: "OPN Testnet",
             nativeCurrency: { name: "OPN Token", symbol: "OPN", decimals: 18 },
-            rpcUrls: ["https://iopn.tech"], // Change this to your exact RPC node endpoint
+            rpcUrls: ["https://iopn.tech"], 
             blockExplorerUrls: ["https://iopn.tech"]
         };
 
@@ -207,7 +209,7 @@
                             params: [OPN_TESTNET_PARAMS],
                         });
                     } catch (addError) {
-                        console.error("Could not append custom RPC node:", addError);
+                        console.error(addError);
                     }
                 }
             }
@@ -219,10 +221,11 @@
                     const connectBtn = document.getElementById('connectBtn');
                     connectBtn.innerText = "Connecting...";
 
-                    // Execute automated network checkpoint
+                    // Network alignment check
                     await enforceNetwork();
 
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
                     if (!accounts || accounts.length === 0) {
                         alert("No active accounts found.");
                         connectBtn.innerText = "Establish Connection";
@@ -230,8 +233,12 @@
                     }
 
                     userAddress = accounts[0]; 
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
 
+                    // Instantly sync layout graphics
                     document.getElementById('walletAddress').innerText = userAddress;
+                    
                     const statusText = document.getElementById('walletStatus');
                     statusText.innerText = "Connected (OPN Chain)";
                     statusText.style.color = "var(--neon-green)";
@@ -240,14 +247,7 @@
                     connectBtn.innerText = "Connection Established";
                     connectBtn.disabled = true;
 
-                    console.log("Session verified for account:", userAddress);
+                    console.log("Connected session verified:", userAddress);
                 } catch (error) {
                     console.error(error);
                     document.getElementById('connectBtn').innerText = "Establish Connection";
-                    alert("Connection Stopped: Unlock wallet and clear pending requests.");
-                }
-            } else {
-                alert("MetaMask environment not found.");
-            }
-        }
-
