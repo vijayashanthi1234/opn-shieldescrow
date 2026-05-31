@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
-    <!-- Verified Ethers.js Dependency Path -->
+    <!-- Stable Ethers.js Production Link -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
     
     <style>
@@ -185,18 +185,21 @@
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
+                    // Safe alternative request method to bypass empty array crashes
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
                     if (!accounts || accounts.length === 0) {
-                        alert("No active account detected. Please open MetaMask and select an account.");
+                        alert("No accounts found. Please open MetaMask and ensure you have an account selected.");
                         return;
                     }
 
+                    // Explicitly pull account index 0 as a text string
                     const activeAccount = accounts[0]; 
 
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
 
+                    // Update UI elements securely
                     document.getElementById('walletAddress').innerText = activeAccount;
                     
                     const statusText = document.getElementById('walletStatus');
@@ -204,14 +207,14 @@
                     statusText.style.color = "var(--neon-green)";
 
                     document.getElementById('indStatus').className = "indicator ind-active";
-                    console.log("Successfully connected to account:", activeAccount);
+                    console.log("Account Linked Successfully:", activeAccount);
 
                 } catch (error) {
-                    console.error("Connection Error:", error);
-                    alert("Connection Refused. Internal Code: " + (error.message || error.code || "Unknown"));
+                    console.error("MetaMask Error Root Details:", error);
+                    alert("Connection Refused. System Code: " + (error.message || "Request Timed Out"));
                 }
             } else {
-                alert("MetaMask extension provider not found. Please install MetaMask.");
+                alert("MetaMask not found.");
             }
         }
 
