@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
-    <!-- Stable Production CDN for Ethers.js -->
+    <!-- Stable, Production CDN for Ethers.js -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
     
     <style>
@@ -142,7 +142,7 @@
                 </div>
                 
                 <div class="meta-label">Security Signature Address</div>
-                <!-- Default seeded display container values -->
+                <!-- Preloaded with your registered address as the default display placeholder -->
                 <div class="address-box" id="walletAddress">0xF10B286940e6Aa72b8EAC394b3259A06eF239753</div>
                 
                 <button class="btn" id="connectBtn" onclick="connectWallet()" style="margin-top: 24px;">Establish Connection</button>
@@ -176,23 +176,25 @@
     </div>
 
     <script>
-        let provider, signer;
-        let connectedAccount = "0xF10B286940e6Aa72b8EAC394b3259A06eF239753"; 
+        let provider, signer, userAddress;
         
+        // Your deployed verified contract address on OPN Chain
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
             "function release() external"
         ];
 
+        // Official OPN Testnet Node RPC parameters for the auto-switching engine
         const OPN_TESTNET_PARAMS = {
-            chainId: "0x2bf7", 
+            chainId: "0x2bf7", // Decimal 11255 matches hex 0x2bf7
             chainName: "OPN Testnet",
             nativeCurrency: { name: "OPN Token", symbol: "OPN", decimals: 18 },
             rpcUrls: ["https://iopn.tech"], 
             blockExplorerUrls: ["https://iopn.tech"]
         };
 
+        // Network check block to automatically align users to the OPN chain
         async function enforceNetwork() {
             if (!window.ethereum) return;
             try {
@@ -201,6 +203,7 @@
                     params: [{ chainId: OPN_TESTNET_PARAMS.chainId }],
                 });
             } catch (switchError) {
+                // Error code 4902 means the user doesn't have the OPN Testnet added yet
                 if (switchError.code === 4902) {
                     try {
                         await window.ethereum.request({
@@ -208,45 +211,38 @@
                             params: [OPN_TESTNET_PARAMS],
                         });
                     } catch (addError) {
-                        console.error("Network addition stalled:", addError);
+                        console.error("Could not add network config node:", addError);
                     }
                 }
             }
         }
 
+        // Direct Trigger Connection Sequence
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     const connectBtn = document.getElementById('connectBtn');
-                    connectBtn.innerText = "Connecting...";
+                    connectBtn.innerText = "Triggering MetaMask...";
 
-                    // Network switch execution sweep
+                    // 1. Force network switcher prompt
                     await enforceNetwork();
 
-                    // Standard direct array request sequence
+                    // 2. Direct, un-blockable command to pop open MetaMask account approval panel
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
                     if (!accounts || accounts.length === 0) {
-                        alert("No accounts selected in your wallet.");
+                        alert("No accounts selected. Please unlock MetaMask and try again.");
                         connectBtn.innerText = "Establish Connection";
                         return;
                     }
 
-                    // FIXED LINE: Target the explicit array index zero position cleanly
-                    connectedAccount = accounts[0]; 
+                    // Grab the first active connected address string from the array safely
+                    userAddress = accounts[0]; 
                     
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
 
-                    // Sync layout indicators immediately
-                    document.getElementById('walletAddress').innerText = connectedAccount;
+                    // Instantly sync up the UI components
+                    document.getElementById('walletAddress').innerText = userAddress;
                     
                     const statusText = document.getElementById('walletStatus');
-                    statusText.innerText = "Connected (OPN Chain)";
-                    statusText.style.color = "var(--neon-green)";
-
-                    document.getElementById('indStatus').className = "indicator ind-active";
-                    connectBtn.innerText = "Connection Established";
-                    connectBtn.disabled = true;
-
-                    console.log("Session connected to account zero index:", connectedAccount);
