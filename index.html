@@ -125,7 +125,6 @@
         .ind-active { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
         .ind-disconnected { background-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
 
-        /* Integrated Log Feed Styles */
         .log-terminal {
             margin-top: 15px;
             background: rgba(0, 0, 0, 0.5);
@@ -152,7 +151,6 @@
         </header>
 
         <div class="grid">
-            <!-- Card 1: System Access -->
             <div class="card col-5">
                 <h3>System Access</h3>
                 <div class="meta-label">Network Authority</div>
@@ -167,7 +165,6 @@
                 <button class="btn" id="connectBtn" onclick="connectWallet()" style="margin-top: 24px;">Establish Connection</button>
             </div>
 
-            <!-- Card 2: Execution Framework with Integrated Live Activity Logger -->
             <div class="card col-7">
                 <h3>Protocol Execution Vault</h3>
                 <div class="flex-buttons" style="margin-top: 10px;">
@@ -181,14 +178,12 @@
                     </div>
                 </div>
 
-                <!-- Technical Quality Visual Tracker -->
                 <div class="meta-label" style="margin-top: 20px;">Live Infrastructure Feed</div>
                 <div class="log-terminal" id="logTerminal">
                     <div class="log-entry log-neutral">[System Initialization Completed. Waiting for network connection...]</div>
                 </div>
             </div>
 
-            <!-- Card 3: Status Layer -->
             <div class="card col-12" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                 <div>
                     <div class="meta-label">Contract Security Vector</div>
@@ -209,71 +204,51 @@
             "function deposit() external payable",
             "function release() external"
         ];
-                const OPN_TESTNET_PARAMS = {
+
+        const OPN_TESTNET_PARAMS = {
             chainId: "0x2bf7", 
             chainName: "OPN Testnet",
             nativeCurrency: { name: "OPN Token", symbol: "OPN", decimals: 18 },
-            rpcUrls: ["https://testnet-rpc.iopn.tech"], 
-            blockExplorerUrls: ["https://testnet.iopn.tech"]
+            rpcUrls: ["https://iopn.tech"], 
+            blockExplorerUrls: ["https://iopn.tech"]
         };
-        // Utility to inject visual log statements dynamically onto the interface card
+
         function logStatus(message, type = 'neutral') {
             const terminal = document.getElementById('logTerminal');
+            if (!terminal) return;
             const timestamp = new Date().toLocaleTimeString();
-            const logClass = `log-${type}`;
-            terminal.innerHTML += `<div class="log-entry ${logClass}">[${timestamp}] ${message}</div>`;
-            terminal.scrollTop = terminal.scrollHeight; // Auto scroll down
+            terminal.innerHTML += `<div class="log-entry log-${type}">[${timestamp}] ${message}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function enforceNetwork() {
+            if (!window.ethereum) return;
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: OPN_TESTNET_PARAMS.chainId }],
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    try {
+                        logStatus("OPN Testnet missing. Adding configuration node...", "info");
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [OPN_TESTNET_PARAMS],
+                        });
+                    } catch (addError) {
+                        logStatus("Failed to add network configuration.", "error");
+                    }
+                }
+            }
         }
 
         async function connectWallet() {
-    // Check if any Web3 provider is present
-    if (typeof window.ethereum !== 'undefined') {
-        try {
-            const connectBtn = document.getElementById('connectBtn');
-            connectBtn.innerText = "Triggering Wallet...";
-            logStatus("Bypassing RPC cache. Sending direct prompt request...", "info");
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const connectBtn = document.getElementById('connectBtn');
+                    connectBtn.innerText = "Triggering Wallet...";
+                    logStatus("Bypassing RPC cache. Sending direct prompt request...", "info");
 
-            // 1. Force network switcher first
-            await enforceNetwork();
-
-            // 2. Direct, un-blockable account call to force the MetaMask pop-up window
-            const accounts = await window.ethereum.request({ 
-                method: 'eth_requestAccounts' 
-            });
-            
-            if (!accounts || accounts.length === 0) {
-                logStatus("No accounts selected by user.", "error");
-                connectBtn.innerText = "Establish Connection";
-                return;
-            }
-
-            // Lock in account index 0 as plain text string data
-            userAddress = accounts[0]; 
-            
-            // Link your ethers wrappers
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-
-            // Instantly change web styles
-            document.getElementById('walletAddress').innerText = userAddress;
-            const statusText = document.getElementById('walletStatus');
-            statusText.innerText = "Connected (OPN Chain)";
-            statusText.style.color = "var(--neon-green)";
-
-            document.getElementById('indStatus').className = "indicator ind-active";
-            connectBtn.innerText = "Connection Established";
-            connectBtn.disabled = true;
-
-            logStatus(`Wallet connected successfully: ${userAddress.slice(0,6)}...`, "success");
-
-        } catch (error) {
-            console.error("MetaMask Trigger Blocked:", error);
-            document.getElementById('connectBtn').innerText = "Establish Connection";
-            logStatus("Handshake denied. Please open MetaMask extension manually to approve.", "error");
-        }
-    } else {
-        logStatus("MetaMask extension undetected.", "error");
-        alert("Please install MetaMask to use this settlement gateway.");
-    }
-}
+                    await enforceNetwork();
 
