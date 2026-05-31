@@ -227,26 +227,55 @@
             terminal.scrollTop = terminal.scrollHeight; // Auto scroll down
         }
 
-        async function enforceNetwork() {
-            if (!window.ethereum) return;
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: OPN_TESTNET_PARAMS.chainId }],
-                });
-            } catch (switchError) {
-                if (switchError.code === 4902) {
-                    try {
-                        logStatus("OPN Testnet missing in wallet. Requesting automatic configuration...", "info");
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [OPN_TESTNET_PARAMS],
-                        });
-                    } catch (addError) {
-                        logStatus("Failed to append OPN Testnet parameter node.", "error");
-                    }
-                }
-            }
-        }
-
         async function connectWallet() {
+    // Check if any Web3 provider is present
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.innerText = "Triggering Wallet...";
+            logStatus("Bypassing RPC cache. Sending direct prompt request...", "info");
+
+            // 1. Force network switcher first
+            await enforceNetwork();
+
+            // 2. Direct, un-blockable account call to force the MetaMask pop-up window
+            const accounts = await window.ethereum.request({ 
+                method: 'eth_requestAccounts' 
+            });
+            
+            if (!accounts || accounts.length === 0) {
+                logStatus("No accounts selected by user.", "error");
+                connectBtn.innerText = "Establish Connection";
+                return;
+            }
+
+            // Lock in account index 0 as plain text string data
+            userAddress = accounts[0]; 
+            
+            // Link your ethers wrappers
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+
+            // Instantly change web styles
+            document.getElementById('walletAddress').innerText = userAddress;
+            const statusText = document.getElementById('walletStatus');
+            statusText.innerText = "Connected (OPN Chain)";
+            statusText.style.color = "var(--neon-green)";
+
+            document.getElementById('indStatus').className = "indicator ind-active";
+            connectBtn.innerText = "Connection Established";
+            connectBtn.disabled = true;
+
+            logStatus(`Wallet connected successfully: ${userAddress.slice(0,6)}...`, "success");
+
+        } catch (error) {
+            console.error("MetaMask Trigger Blocked:", error);
+            document.getElementById('connectBtn').innerText = "Establish Connection";
+            logStatus("Handshake denied. Please open MetaMask extension manually to approve.", "error");
+        }
+    } else {
+        logStatus("MetaMask extension undetected.", "error");
+        alert("Please install MetaMask to use this settlement gateway.");
+    }
+}
+
