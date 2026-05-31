@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
+    <!-- Primary Ethers Library CDN Hook -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="text/javascript"></script>
+    
     <style>
         :root {
             --bg-main: #06040a;
@@ -171,9 +174,6 @@
         </div>
     </div>
 
-    <!-- The Ethers library script is moved here to ensure the HTML skeleton renders first -->
-    <script src="https://cloudflare.com" type="text/javascript"></script>
-
     <script>
         let userAddress = null;
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
@@ -182,14 +182,23 @@
             "function release() external"
         ];
 
-        // Native JavaScript implementation - 100% independent of Ethers library loading state
+        // Backup plan if primary cdnjs node fails to load
+        window.addEventListener('load', () => {
+            if (typeof ethers === 'undefined') {
+                console.log("cdnjs failed. Deploying backup jsDelivr library mirror...");
+                const backupScript = document.createElement('script');
+                backupScript.src = "https://jsdelivr.net";
+                document.head.appendChild(backupScript);
+            }
+        });
+
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     const connectBtn = document.getElementById('connectBtn');
                     connectBtn.innerText = "Connecting...";
 
-                    // Request account array structure directly from the browser window object
+                    // Get accounts directly via native browser implementation (bypasses ethers completely)
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     
                     if (!accounts || accounts.length === 0) {
@@ -200,7 +209,7 @@
 
                     userAddress = accounts[0]; 
 
-                    // Instantly push the wallet string value directly to visual element blocks
+                    // Update UI elements smoothly
                     document.getElementById('walletAddress').innerText = userAddress;
                     
                     const statusText = document.getElementById('walletStatus');
@@ -211,12 +220,12 @@
                     connectBtn.innerText = "Connection Established";
                     connectBtn.disabled = true;
 
-                    console.log("Connected Successfully via Native Bridge:", userAddress);
+                    console.log("Account Linked Successfully:", userAddress);
 
                 } catch (error) {
                     console.error("Connection Error Details:", error);
                     document.getElementById('connectBtn').innerText = "Establish Connection";
-                    alert("Connection Interrupted: " + (error.message || "User declined interface authorization request."));
+                    alert("Connection Refused: " + (error.message || "Interception occurred."));
                 }
             } else {
                 alert("MetaMask client application environment not found.");
@@ -225,7 +234,7 @@
 
         async function triggerDeposit() {
             if (!userAddress) { return alert("Please establish connection first."); }
-            if (typeof ethers === 'undefined') { return alert("Ethers library is still loading from CDN. Please wait 5 seconds."); }
+            if (typeof ethers === 'undefined') { return alert("The Ethers library is still downloading. Please try again in 5 seconds."); }
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
@@ -233,13 +242,4 @@
                 
                 const depositAmount = prompt("Enter collateral volume to deposit:", "0.1");
                 if (!depositAmount) return;
-
-                const tx = await contract.deposit({ value: ethers.utils.parseEther(depositAmount) });
-                await tx.wait();
-                alert("Deposit finalized successfully!");
-            } catch (error) {
-                console.error(error);
-                alert("Transaction tracking aborted.");
-            }
-        }
 
