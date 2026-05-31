@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
     
-    <!-- Stable, Production CDN for Ethers.js -->
+    <!-- Stable Production CDN for Ethers.js -->
     <script src="https://cloudflare.com" type="text/javascript"></script>
     
     <style>
@@ -20,6 +20,7 @@
             --text-muted: #8b8698;
             --neon-green: #00ffcc;
             --neon-red: #ff3366;
+            --neon-blue: #00bfff;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -123,6 +124,24 @@
         }
         .ind-active { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
         .ind-disconnected { background-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
+
+        /* Integrated Log Feed Styles */
+        .log-terminal {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-neutral { color: var(--text-muted); }
+        .log-info { color: var(--neon-blue); }
+        .log-success { color: var(--neon-green); }
+        .log-error { color: var(--neon-red); }
     </style>
 </head>
 <body>
@@ -133,6 +152,7 @@
         </header>
 
         <div class="grid">
+            <!-- Card 1: System Access -->
             <div class="card col-5">
                 <h3>System Access</h3>
                 <div class="meta-label">Network Authority</div>
@@ -142,26 +162,33 @@
                 </div>
                 
                 <div class="meta-label">Security Signature Address</div>
-                <!-- Preloaded with your registered address as the default display placeholder -->
                 <div class="address-box" id="walletAddress">0xF10B286940e6Aa72b8EAC394b3259A06eF239753</div>
                 
                 <button class="btn" id="connectBtn" onclick="connectWallet()" style="margin-top: 24px;">Establish Connection</button>
             </div>
 
+            <!-- Card 2: Execution Framework with Integrated Live Activity Logger -->
             <div class="card col-7">
                 <h3>Protocol Execution Vault</h3>
                 <div class="flex-buttons" style="margin-top: 10px;">
                     <div>
                         <div class="meta-label">Action 01</div>
-                        <button class="btn" onclick="triggerDeposit()">Initialize Collateral Deposit</button>
+                        <button class="btn" id="depositBtn" onclick="triggerDeposit()">Initialize Collateral Deposit</button>
                     </div>
                     <div style="margin-top: 10px;">
                         <div class="meta-label">Action 02</div>
-                        <button class="btn btn-outline" onclick="triggerRelease()">Authorize Asset Settlement Release</button>
+                        <button class="btn btn-outline" id="releaseBtn" onclick="triggerRelease()">Authorize Asset Settlement Release</button>
                     </div>
+                </div>
+
+                <!-- Technical Quality Visual Tracker -->
+                <div class="meta-label" style="margin-top: 20px;">Live Infrastructure Feed</div>
+                <div class="log-terminal" id="logTerminal">
+                    <div class="log-entry log-neutral">[System Initialization Completed. Waiting for network connection...]</div>
                 </div>
             </div>
 
+            <!-- Card 3: Status Layer -->
             <div class="card col-12" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                 <div>
                     <div class="meta-label">Contract Security Vector</div>
@@ -177,24 +204,29 @@
 
     <script>
         let provider, signer, userAddress;
-        
-        // Your deployed verified contract address on OPN Chain
         const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
         const contractABI = [
             "function deposit() external payable",
             "function release() external"
         ];
 
-        // Official OPN Testnet Node RPC parameters for the auto-switching engine
         const OPN_TESTNET_PARAMS = {
-            chainId: "0x2bf7", // Decimal 11255 matches hex 0x2bf7
+            chainId: "0x2bf7", 
             chainName: "OPN Testnet",
             nativeCurrency: { name: "OPN Token", symbol: "OPN", decimals: 18 },
             rpcUrls: ["https://iopn.tech"], 
             blockExplorerUrls: ["https://iopn.tech"]
         };
 
-        // Network check block to automatically align users to the OPN chain
+        // Utility to inject visual log statements dynamically onto the interface card
+        function logStatus(message, type = 'neutral') {
+            const terminal = document.getElementById('logTerminal');
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = `log-${type}`;
+            terminal.innerHTML += `<div class="log-entry ${logClass}">[${timestamp}] ${message}</div>`;
+            terminal.scrollTop = terminal.scrollHeight; // Auto scroll down
+        }
+
         async function enforceNetwork() {
             if (!window.ethereum) return;
             try {
@@ -203,46 +235,18 @@
                     params: [{ chainId: OPN_TESTNET_PARAMS.chainId }],
                 });
             } catch (switchError) {
-                // Error code 4902 means the user doesn't have the OPN Testnet added yet
                 if (switchError.code === 4902) {
                     try {
+                        logStatus("OPN Testnet missing in wallet. Requesting automatic configuration...", "info");
                         await window.ethereum.request({
                             method: 'wallet_addEthereumChain',
                             params: [OPN_TESTNET_PARAMS],
                         });
                     } catch (addError) {
-                        console.error("Could not add network config node:", addError);
+                        logStatus("Failed to append OPN Testnet parameter node.", "error");
                     }
                 }
             }
         }
 
-        // Direct Trigger Connection Sequence
         async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const connectBtn = document.getElementById('connectBtn');
-                    connectBtn.innerText = "Triggering MetaMask...";
-
-                    // 1. Force network switcher prompt
-                    await enforceNetwork();
-
-                    // 2. Direct, un-blockable command to pop open MetaMask account approval panel
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    if (!accounts || accounts.length === 0) {
-                        alert("No accounts selected. Please unlock MetaMask and try again.");
-                        connectBtn.innerText = "Establish Connection";
-                        return;
-                    }
-
-                    // Grab the first active connected address string from the array safely
-                    userAddress = accounts[0]; 
-                    
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-
-                    // Instantly sync up the UI components
-                    document.getElementById('walletAddress').innerText = userAddress;
-                    
-                    const statusText = document.getElementById('walletStatus');
