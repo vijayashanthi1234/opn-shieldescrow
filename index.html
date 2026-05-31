@@ -1,35 +1,246 @@
-async function connectWallet() {
-    if (typeof window.ethereum !== 'undefined') {
-        try {
-            // Request accounts explicitly
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            // Check if MetaMask returned an empty list
-            if (!accounts || accounts.length === 0) {
-                alert("No active account detected. Please open MetaMask and select an account.");
-                return;
-            }
-
-            // Force connection to the first active account in the array
-            const activeAccount = accounts[0]; 
-
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-
-            document.getElementById('walletAddress').innerText = activeAccount;
-            
-            const statusText = document.getElementById('walletStatus');
-            statusText.innerText = "Connected";
-            statusText.style.color = "var(--neon-green)";
-
-            document.getElementById('indStatus').className = "indicator ind-active";
-            console.log("Successfully locked to account:", activeAccount);
-
-        } catch (error) {
-            console.error("Connection Error:", error);
-            alert("Connection Refused. Internal Code: " + (error.message || error.code || "Unknown"));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPN Shield Escrow | Decentralized Security Dashboard</title>
+    
+    <!-- Verified Ethers.js Dependency Path -->
+    <script src="https://cloudflare.com" type="text/javascript"></script>
+    
+    <style>
+        :root {
+            --bg-main: #06040a;
+            --card-bg: rgba(15, 11, 28, 0.7);
+            --border-color: rgba(130, 71, 229, 0.2);
+            --border-glow: rgba(130, 71, 229, 0.4);
+            --primary-accent: #8247e5;
+            --primary-hover: #9662ea;
+            --text-main: #f3f1f6;
+            --text-muted: #8b8698;
+            --neon-green: #00ffcc;
+            --neon-red: #ff3366;
         }
-    } else {
-        alert("MetaMask extension provider not found.");
-    }
-}
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+            font-family: sans-serif; 
+            min-height: 100vh;
+            padding: 60px 20px;
+            background-image: 
+                linear-gradient(rgba(130, 71, 229, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(130, 71, 229, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 50px; }
+        
+        header h1 { 
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 30%, var(--primary-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(12, 1fr); 
+            gap: 24px; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 30px; 
+            border-radius: 16px; 
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .col-5 { grid-column: span 5; }
+        .col-7 { grid-column: span 7; }
+        .col-12 { grid-column: span 12; }
+
+        @media (max-width: 850px) { .card { grid-column: span 12 !important; } }
+
+        h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 20px; color: #fff; letter-spacing: -0.3px; }
+
+        .meta-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .meta-value { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; }
+        
+        .address-box {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.05);
+            word-break: break-all;
+        }
+
+        .btn { 
+            background: var(--primary-accent); 
+            color: #fff; 
+            border: none; 
+            padding: 14px 28px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            width: 100%; 
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover { 
+            background: var(--primary-hover); 
+        }
+
+        .btn-outline {
+            background: rgba(35, 27, 58, 0.4);
+            border: 1px solid var(--primary-accent);
+        }
+
+        .flex-buttons { display: flex; flex-direction: column; gap: 14px; }
+        
+        .indicator {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .ind-active { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+        .ind-disconnected { background-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ OPN Shield Escrow</h1>
+            <p>Institutional Peer-to-Peer Settlement Protocol</p>
+        </header>
+
+        <div class="grid">
+            <div class="card col-5">
+                <h3>System Access</h3>
+                <div class="meta-label">Network Authority</div>
+                <div class="meta-value">
+                    <span id="indStatus" class="indicator ind-disconnected"></span>
+                    <span id="walletStatus" style="color: var(--neon-red);">Disconnected</span>
+                </div>
+                
+                <div class="meta-label">Security Signature Address</div>
+                <div class="address-box" id="walletAddress">0x...</div>
+                
+                <button class="btn" id="connectBtn" onclick="connectWallet()" style="margin-top: 24px;">Establish Connection</button>
+            </div>
+
+            <div class="card col-7">
+                <h3>Protocol Execution Vault</h3>
+                <div class="flex-buttons" style="margin-top: 10px;">
+                    <div>
+                        <div class="meta-label">Action 01</div>
+                        <button class="btn" onclick="triggerDeposit()">Initialize Collateral Deposit</button>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div class="meta-label">Action 02</div>
+                        <button class="btn btn-outline" onclick="triggerRelease()">Authorize Asset Settlement Release</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card col-12" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <div class="meta-label">Contract Security Vector</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--neon-green);">ACTIVE // ARCHITECTURE UNPAUSED</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="meta-label">Monitored Ledger Infrastructure</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #fff;">1 Cryptographic Vault Active</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let provider, signer;
+        const contractAddress = "0xa0772b29afBc2538DDfF50Ae72DA61Ab4725536A";
+        const contractABI = [
+            "function deposit() external payable",
+            "function release() external"
+        ];
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    if (!accounts || accounts.length === 0) {
+                        alert("No active account detected. Please open MetaMask and select an account.");
+                        return;
+                    }
+
+                    const activeAccount = accounts[0]; 
+
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+
+                    document.getElementById('walletAddress').innerText = activeAccount;
+                    
+                    const statusText = document.getElementById('walletStatus');
+                    statusText.innerText = "Connected";
+                    statusText.style.color = "var(--neon-green)";
+
+                    document.getElementById('indStatus').className = "indicator ind-active";
+                    console.log("Successfully connected to account:", activeAccount);
+
+                } catch (error) {
+                    console.error("Connection Error:", error);
+                    alert("Connection Refused. Internal Code: " + (error.message || error.code || "Unknown"));
+                }
+            } else {
+                alert("MetaMask extension provider not found. Please install MetaMask.");
+            }
+        }
+
+        async function triggerDeposit() {
+            if (!signer) { return alert("Please connect wallet first."); }
+            try {
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const depositAmount = prompt("Enter collateral volume to deposit:", "0.1");
+                if (!depositAmount) return;
+
+                const tx = await contract.deposit({ value: ethers.utils.parseEther(depositAmount) });
+                await tx.wait();
+                alert("Deposit finalized!");
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function triggerRelease() {
+            if (!signer) { return alert("Please connect wallet first."); }
+            try {
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const tx = await contract.release();
+                await tx.wait();
+                alert("Settlement released!");
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
