@@ -1,120 +1,135 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPN ShieldEscrow Portal</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: #111827; padding: 30px; border-radius: 12px; border: 1px solid #1f2937; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h1 { color: #3b82f6; border-bottom: 2px solid #1f2937; padding-bottom: 10px; }
+        .badge { background: #1e3a8a; color: #60a5fa; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; display: inline-block; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .card { background: #1f2937; padding: 20px; border-radius: 8px; border: 1px solid #374151; }
+        label { display: block; margin-bottom: 8px; color: #9ca3af; font-size: 0.9em; }
+        input { width: 100%; padding: 10px; background: #111827; border: 1px solid #4b5563; border-radius: 6px; color: #fff; box-sizing: border-box; margin-bottom: 15px; }
+        button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #1d4ed8; }
+        .status-box { margin-top: 20px; padding: 15px; background: #064e3b; border-left: 4px solid #10b981; border-radius: 4px; display: none; }
+    </style>
+</head>
+<body>
 
-/**
- * @title OPNShieldEscrow
- * @dev High-utility privacy-shielded escrow for prediction markets on OPN Chain.
- * Designed for IOPn Builders Programme Season 1 & Season 2.
- */
-contract OPNShieldEscrow {
+<div class="container">
+    <div class="badge">IOPn Builders Season 1: DeFi x Privacy</div>
+    <h1>🛡️ OPN ShieldEscrow Interface</h1>
+    <p>Securely deposit collateral into prediction markets using cryptographic identity shielding.</p>
     
-    enum MarketState { Open, Locked, Resolved, Cancelled }
+    <button id="connectBtn" style="background:#059669;">Connect Web3 Wallet</button>
+    <p id="walletAddress" style="color:#10b981; font-size:0.9em; margin-top:5px;"></p>
 
-    struct Market {
-        bytes32 shieldedConditionHash; // Hashed target outcome + verification parameters
-        uint256 totalPool;             // Total locked collateral
-        uint256 resolutionTimestamp;   // Target resolution timeline
-        MarketState state;             // Current operational cycle
-        address creator;               // Creator identity tracking
+    <div class="grid">
+        <!-- Deposit/Commit Section -->
+        <div class="card">
+            <h3>1. Deposit Shielded Collateral</h3>
+            <label>Market ID (Bytes32 String)</label>
+            <input type="text" id="depMarketId" placeholder="0x...">
+            
+            <label>Secret Commitment Salt (Keep Safe!)</label>
+            <input type="password" id="depSalt" placeholder="Your Private Phrase">
+            
+            <label>Collateral Amount (OPN Native)</label>
+            <input type="number" step="0.01" id="depAmount" placeholder="1.0">
+            
+            <button onclick="executeShieldedDeposit()">Commit & Deposit</button>
+        </div>
+
+        <!-- Claim/Reveal Section -->
+        <div class="card">
+            <h3>2. Claim Cryptographic Payout</h3>
+            <label>Market ID (Bytes32 String)</label>
+            <input type="text" id="claimMarketId" placeholder="0x...">
+            
+            <label>Your Secret Commitment Salt</label>
+            <input type="password" id="claimSalt" placeholder="Your Private Phrase">
+            
+            <label>Payout Destination Address</label>
+            <input type="text" id="claimDest" placeholder="0x...">
+            
+            <button onclick="executeShieldedClaim()" style="background:#7c3aed;">Reveal & Claim</button>
+        </div>
+    </div>
+
+    <div id="statusBox" class="status-box"></div>
+</div>
+
+<script>
+    // Frontend Web3 Logic Configuration
+    const contractAddress = "YOUR_DEPLOYED_CONTRACT_ADDRESS";
+    const contractABI = [
+        "function depositShieldedCollateral(bytes32 _marketId, bytes32 _identityCommitment) external payable",
+        "function claimShieldedPayout(bytes32 _marketId, string memory _secretSalt, address payable _payoutDestination) external"
+    ];
+
+    let provider, signer, contract;
+
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+        if (window.ethereum) {
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = provider.getSigner();
+            contract = new ethers.Contract(contractAddress, contractABI, signer);
+            const address = await signer.getAddress();
+            document.getElementById('walletAddress').innerText = `Connected: ${address}`;
+            showStatus("Wallet connected successfully!");
+        } else {
+            alert("Please install MetaMask to interact with OPN ShieldEscrow.");
+        }
+    });
+
+    function showStatus(msg) {
+        const box = document.getElementById('statusBox');
+        box.innerText = msg;
+        box.style.display = 'block';
     }
 
-    struct Commitment {
-        bytes32 shieldedIdentityCommitment; // keccak256(realRecipientAddress + secretSalt)
-        uint256 stakeAmount;                // Escrowed asset value
-        bool claimed;                       // State prevention for double-spend
+    async function executeShieldedDeposit() {
+        try {
+            const marketId = document.getElementById('depMarketId').value;
+            const salt = document.getElementById('depSalt').value;
+            const amount = document.getElementById('depAmount').value;
+            const userAddress = await signer.getAddress();
+            
+            // Build the cryptographic identity privacy shield locally off-chain
+            const messagePacked = ethers.utils.solidityPack(["address", "string"], [userAddress, salt]);
+            const commitmentHash = ethers.utils.keccak256(messagePacked);
+            
+            showStatus("Assembling cryptographic shield...");
+            const tx = await contract.depositShieldedCollateral(marketId, commitmentHash, {
+                value: ethers.utils.parseEther(amount)
+            });
+            await tx.wait();
+            showStatus(`Deposit verified on OPN Chain! Tx: ${tx.hash}`);
+        } catch (err) {
+            showStatus(`Execution Error: ${err.message}`);
+        }
     }
 
-    mapping(bytes32 => Market) public markets;
-    // Market ID => Shielded Identity Hash => Commitment Data
-    mapping(bytes32 => mapping(bytes32 => Commitment)) public commitments;
-
-    // Events for frontend indexing and OPN Explorer transparency
-    event MarketCreated(bytes32 indexed marketId, bytes32 indexed conditionHash);
-    event ShieldedDepositPlaced(bytes32 indexed marketId, bytes32 indexed identityCommitment, uint256 amount);
-    event ShieldedPayoutClaimed(bytes32 indexed marketId, address indexed recipient, uint256 payout);
-
-    modifier onlyState(bytes32 _marketId, MarketState _state) {
-        require(markets[_marketId].state == _state, "Invalid market state");
-        _;
+    async function executeShieldedClaim() {
+        try {
+            const marketId = document.getElementById('claimMarketId').value;
+            const salt = document.getElementById('claimSalt').value;
+            const dest = document.getElementById('claimDest').value;
+            
+            showStatus("Submitting proof validation loop...");
+            const tx = await contract.claimShieldedPayout(marketId, salt, dest);
+            await tx.wait();
+            showStatus(`Payout unlocked and routed cleanly! Tx: ${tx.hash}`);
+        } catch (err) {
+            showStatus(`Execution Error: ${err.message}`);
+        }
     }
-
-    /**
-     * @notice Creates a new prediction escrow with a hidden resolution condition.
-     */
-    function createShieldedMarket(bytes32 _marketId, bytes32 _conditionHash, uint256 _duration) external {
-        require(markets[_marketId].creator == address(0), "Market already exists");
-        
-        markets[_marketId] = Market({
-            shieldedConditionHash: _conditionHash,
-            totalPool: 0,
-            resolutionTimestamp: block.timestamp + _duration,
-            state: MarketState.Open,
-            creator: msg.sender
-        });
-
-        emit MarketCreated(_marketId, _conditionHash);
-    }
-
-    /**
-     * @notice Places a shielded bet/deposit using a cryptographic identity hash.
-     * @param _marketId Target prediction escrow ID.
-     * @param _identityCommitment The keccak256 hash of (msg.sender + private key/salt).
-     */
-    function depositShieldedCollateral(bytes32 _marketId, bytes32 _identityCommitment) 
-        external 
-        payable 
-        onlyState(_marketId, MarketState.Open) 
-    {
-        require(msg.value > 0, "Collateral must be greater than 0");
-        
-        Commitment storage userCommit = commitments[_marketId][_identityCommitment];
-        require(userCommit.stakeAmount == 0, "Identity commitment already used");
-
-        userCommit.shieldedIdentityCommitment = _identityCommitment;
-        userCommit.stakeAmount = msg.value;
-        
-        markets[_marketId].totalPool += msg.value;
-
-        emit ShieldedDepositPlaced(_marketId, _identityCommitment, msg.value);
-    }
-
-    /**
-     * @notice Resolves the market condition (Simulates OPN Oracle Integration).
-     */
-    function resolveMarket(bytes32 _marketId, MarketState _finalState) external onlyState(_marketId, MarketState.Open) {
-        // In production, verify against OPN Chain Decentralized Oracle infrastructure
-        require(block.timestamp >= markets[_marketId].resolutionTimestamp, "Timeline not met");
-        require(_finalState == MarketState.Resolved || _finalState == MarketState.Cancelled, "Invalid final state");
-        
-        markets[_marketId].state = _finalState;
-    }
-
-    /**
-     * @notice Claims funds privately by proving ownership of the identity commitment without revealing betting history.
-     * @param _marketId Target prediction escrow ID.
-     * @param _secretSalt Private cryptographic key chosen by user during deposit.
-     * @param _payoutDestination Public address to send the unshielded funds.
-     */
-    function claimShieldedPayout(bytes32 _marketId, string memory _secretSalt, address payable _payoutDestination) 
-        external 
-        onlyState(_marketId, MarketState.Resolved) 
-    {
-        // Reconstruct commitment on-chain using the unshielded recipient and secret salt
-        bytes32 computedCommitment = keccak256(abi.encodePacked(_payoutDestination, _secretSalt));
-        Commitment storage userCommit = commitments[_marketId][computedCommitment];
-
-        require(userCommit.stakeAmount > 0, "No commitment found for this identity parameter");
-        require(!userCommit.claimed, "Payout already claimed");
-
-        // Reward calculation logic (Simplification: Returns base stake + proportional pool reward)
-        uint256 rewardPayout = userCommit.stakeAmount; 
-        
-        userCommit.claimed = true;
-        markets[_marketId].totalPool -= rewardPayout;
-
-        (bool success, ) = _payoutDestination.call{value: rewardPayout}("");
-        require(success, "OPN Native transfer failed");
-
-        emit ShieldedPayoutClaimed(_marketId, _payoutDestination, rewardPayout);
-    }
-}
+</script>
+</body>
+</html>
