@@ -1,80 +1,371 @@
-# OPN ShieldEscrow: Privacy-Preserving Prediction & Escrow Rails
+# 🛡️ OPN ShieldEscrow
 
-[![OPN Chain Integration](https://shields.io)](https://iopn.tech)
-[![Submission Stage](https://shields.io)](https://iopn.techb/vijay-1)
+### Privacy-Preserving Prediction Markets & Escrow Infrastructure for OPN Chain
 
-## 📌 Project Overview
-OPN ShieldEscrow is a privacy-first decentralized escrow and prediction architecture built natively for **OPN Chain**. It bridges the high-velocity volume demands of **Season 1 (DeFi & Open Finance)** with the cryptographic privacy framework required for **Season 2 (Identity & Privacy)**.
-
-By utilizing an on-chain **Commit-Reveal Cryptographic Architecture**, users can lock collateral into conditional prediction markets without exposing their public wallet identity, wallet history, or total assets to tracking scripts or MEV bots.
-
-### 🔗 Quick Links
-- **OPN Builders Dashboard Profile:** [vijay-1](https://iopn.techb/vijay-1)
-- **Live Testnet Contract Deployment:** `0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A`
-- **OPN Chain Block Receipt:** Block #17487995
+[![OPN Builder Program](https://img.shields.io/badge/OPN-Builder%20Program-blue)](https://builders.iopn.tech/)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-green)](#)
+[![Status](https://img.shields.io/badge/Status-Testnet%20Deployed-success)](#)
 
 ---
 
-## 🎯 IOPn Rubric Alignment (Judges Scoring Guide)
+# 📌 One-Line Summary
 
-### 1. OPN Chain Integration (Weight: 30%)
-* **Load-Bearing Infrastructure:** This is not a standard "toy token" deployment. The contract acts as a core structural protocol handling native value custody, time-locked releases, and dynamic state machines directly dependent on OPN block primitives.
-* **On-Chain Mechanics:** Implements cryptographically isolated mappings to manage global pools transparently while tracking user data anonymously.
-
-### 2. Technical Quality (Weight: 25%)
-* **Optimized Solidity:** Written in explicit, human-readable compliance with security standard `0.8.20`.
-* **State Machine Integrity:** Strict execution flows governed by `onlyState` modifiers to eliminate race conditions, reentrancy vulnerabilities, or unauthorized fund leakage.
-
-### 3. Product & UX (Weight: 20%)
-* **Frictionless Onboarding:** Front-end users interact using simple mnemonic salts. The complex cryptographic hashing (`keccak256`) happens cleanly background-side during deposit and claim loops.
-
-### 4. Innovation (Weight: 15%)
-* **The Dual-Season Bridge:** Unlike typical cloned prediction markets, OPN ShieldEscrow isolates user identity from public execution logs. This creates an immediate blueprint for future Zero-Knowledge (ZK) and Decentralized Identifier (DID) integrations.
-
-### 5. Builder Commitment (Weight: 10%)
-* **Milestone Execution:** This live repository demonstrates clear, ongoing iterations. This setup is prepared for instant adjustments during the Stage 2 Refinement Window based on core developer feedback.
+OPN ShieldEscrow is a privacy-preserving escrow protocol for prediction markets on OPN Chain, using commit-reveal cryptography to separate user identity from market participation while maintaining transparent on-chain settlement.
 
 ---
 
-## ⚙️ Technical Architecture & Core Loop
+# 🚀 Project Overview
+
+Prediction markets provide powerful mechanisms for information discovery and collective forecasting. However, most existing systems expose participant identities, collateral positions, and payout destinations directly on-chain.
+
+OPN ShieldEscrow explores a different approach.
+
+The protocol introduces a cryptographic commitment layer that enables users to participate in prediction markets without publicly linking wallet addresses to market activity. Through a commit-reveal escrow architecture, collateral deposits, participation records, and reward claims can be coordinated while reducing unnecessary exposure of user behavior.
+
+Built natively on OPN Chain, ShieldEscrow serves as a foundational DeFi primitive for:
+
+* Prediction Markets
+* Conditional Escrow Systems
+* Private Settlement Infrastructure
+* Anonymous Reward Distribution
+* Future Identity-Aware Financial Applications
+
+---
+
+# 🎯 Problem Statement
+
+Traditional prediction markets reveal:
+
+* Wallet addresses
+* Participation history
+* Position sizes
+* Payout destinations
+* Market preferences
+
+This creates privacy concerns for users and may discourage participation in sensitive or high-value markets.
+
+ShieldEscrow addresses this challenge by introducing cryptographic commitments that separate identity from participation while preserving deterministic settlement and on-chain verification.
+
+---
+
+# 💡 Solution
+
+ShieldEscrow uses a commit-reveal architecture where users lock collateral into escrow contracts using a secret commitment.
+
+Instead of publicly recording direct user participation:
+
+1. Users generate a private secret.
+2. The secret is hashed using `keccak256`.
+3. The commitment is stored on-chain.
+4. Markets settle normally.
+5. Users later reveal the secret to claim rewards.
+
+This process allows users to prove ownership without exposing participation details during market execution.
+
+---
+
+# ⚙️ Why OPN Chain?
+
+ShieldEscrow was designed specifically for OPN Chain because:
+
+* Fast confirmation times improve settlement UX.
+* Low transaction costs enable frequent escrow interactions.
+* Future NeoID compatibility supports privacy-aware identity systems.
+* Builder-focused infrastructure encourages experimentation with advanced DeFi primitives.
+* OPN's long-term vision aligns with privacy, sovereignty, and decentralized ownership.
+
+The protocol demonstrates how privacy-oriented financial coordination can be implemented efficiently within the OPN ecosystem.
+
+---
+
+# 🏗️ Technical Architecture
+
+## High-Level Flow
 
 ```text
-[ User Action: Open Market ] ────> Generates Shielded Market Mapping (Id + Condition Hash)
-[ User Action: Deposit ]      ────> Generates ShieldedIdentityCommitment (Hashed User + Salt)
-[ System Action: Resolve ]    ────> Condition verified via OPN Oracle Infrastructure
-[ User Action: Claim ]        ────> Provides original Secret Salt -> Releases unshielded funds cleanly
+User Creates Market
+        │
+        ▼
+Generate Condition Hash
+        │
+        ▼
+Deposit Collateral
+        │
+        ▼
+Generate Commitment
+(keccak256(secret))
+        │
+        ▼
+Store Commitment On-Chain
+        │
+        ▼
+Market Resolution
+        │
+        ▼
+Reveal Secret
+        │
+        ▼
+Verify Commitment
+        │
+        ▼
+Release Funds
 ```
 
 ---
 
-## 🚀 Local Installation & Testing Walkthrough
+## Protocol Components
 
-### Prerequisites
-- Node.js (v18+)
-- Hardhat or Foundry
+### Market Registry
 
-### 1. Clone & Install Dependencies
+Tracks active prediction markets and associated conditions.
+
+### Escrow Vault
+
+Stores collateral securely until settlement.
+
+### Commitment Engine
+
+Generates and verifies cryptographic commitments.
+
+### Settlement Module
+
+Processes outcome verification and reward calculations.
+
+### Claim Engine
+
+Allows users to reveal secrets and withdraw funds.
+
+---
+
+# 🔐 Privacy Model
+
+ShieldEscrow currently uses a commit-reveal mechanism to provide privacy benefits.
+
+Current protections include:
+
+* Separation of participation from wallet activity
+* Delayed identity disclosure
+* Reduced visibility of market behavior
+* Commitment-based verification
+
+Future upgrades will explore:
+
+* zk-SNARK verification
+* Selective disclosure
+* NeoID integration
+* Privacy-preserving reputation systems
+
+---
+
+# 📊 OPN Builder Program Alignment
+
+## 1. OPN Chain Integration (30%)
+
+* Native deployment on OPN Testnet
+* Uses OPN infrastructure for escrow settlement
+* Designed for future NeoID compatibility
+* Supports OPN-native DeFi experimentation
+
+## 2. Technical Quality (25%)
+
+* Solidity 0.8.20
+* Modular architecture
+* Commitment verification system
+* Deterministic settlement logic
+* Structured state transitions
+
+## 3. Product & UX (20%)
+
+* Simple user workflow
+* Minimal onboarding complexity
+* Wallet-based interaction
+* Transparent claim process
+
+## 4. Innovation (15%)
+
+* Privacy-preserving prediction market architecture
+* Identity abstraction using commitments
+* Foundation for future zero-knowledge integrations
+
+## 5. Builder Commitment (10%)
+
+* Active repository development
+* Public deployment
+* Iterative roadmap
+* Planned Season 2 enhancements
+
+---
+
+# 🔧 Deployment Information
+
+| Item             | Value                  |
+| ---------------- | ---------------------- |
+| Network          | OPN Testnet            |
+| Compiler         | Solidity 0.8.20        |
+| Contract Type    | Escrow + Commit-Reveal |
+| Deployment Block | 17487995               |
+| Status           | Live MVP               |
+
+### Contract Address
+
+```text
+0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A
+```
+
+---
+
+# 🧪 Local Development
+
+## Prerequisites
+
+* Node.js v18+
+* npm
+* Hardhat
+
+---
+
+## Clone Repository
+
 ```bash
-git clone https://github.com
-cd opn-shield-escrow
+git clone https://github.com/yourusername/opn-shieldescrow.git
+
+cd opn-shieldescrow
+```
+
+---
+
+## Install Dependencies
+
+```bash
 npm install
 ```
 
-### 2. Compile Smart Contracts
+---
+
+## Compile Contracts
+
 ```bash
 npx hardhat compile
 ```
 
-### 3. Run Local Test Coverage
+---
+
+## Run Tests
+
 ```bash
 npx hardhat test
 ```
 
 ---
 
-## 🗺️ Engineering Roadmap
+## Start Local Development Server
 
-- [x] **Phase 1 (Done):** Core Shielded Escrow state contracts written and compiled.
-- [x] **Phase 2 (Done):** Initial Testnet Deployment verified at Block #17487995.
-- [ ] **Phase 3 (In Progress):** Integration with decentralized oracle structures on OPN Chain.
-- [ ] **Phase 4 (Season 2 Prep):** Upgrading native commitments to zero-knowledge proofs (zk-SNARKs).
+```bash
+npm run dev
+```
+
+---
+
+# 🔒 Security Considerations
+
+Current MVP protections include:
+
+* Solidity 0.8.x overflow protection
+* Commitment verification before claims
+* Controlled state transitions
+* Separation of settlement and withdrawal logic
+
+Planned improvements include:
+
+* Expanded automated testing
+* Independent code review
+* Formal security assessment
+* zk-proof verification layer
+
+---
+
+# 🛣️ Development Roadmap
+
+## Phase 1 — Core Infrastructure ✅
+
+* Escrow contract development
+* Commitment verification system
+* Initial frontend implementation
+
+---
+
+## Phase 2 — Testnet Deployment ✅
+
+* OPN Testnet deployment
+* Contract verification
+* Initial UX testing
+
+---
+
+## Phase 3 — Oracle Integration 🚧
+
+* Outcome verification framework
+* Automated market settlement
+* Enhanced dispute handling
+
+---
+
+## Phase 4 — Identity & Privacy Expansion 🚧
+
+* NeoID integration
+* Privacy-preserving reputation systems
+* Selective disclosure controls
+* zk-SNARK proof research
+
+---
+
+## Phase 5 — Ecosystem Infrastructure 🔭
+
+* Multi-market support
+* Cross-protocol integrations
+* SDK for OPN developers
+* Modular escrow APIs
+
+---
+
+# 📷 Screenshots
+
+### Landing Page
+
+*Add screenshot here*
+
+### Wallet Connection
+
+*Add screenshot here*
+
+### Deposit Flow
+
+*Add screenshot here*
+
+### Claim Flow
+
+*Add screenshot here*
+
+### Contract Deployment
+
+*Add explorer screenshot here*
+
+---
+
+# 🌐 Future Vision
+
+ShieldEscrow is intended to evolve beyond prediction markets into a reusable privacy-oriented settlement layer for the OPN ecosystem.
+
+Potential applications include:
+
+* Private crowdfunding
+* Confidential grant distribution
+* Anonymous DAO voting incentives
+* Escrow coordination services
+* Identity-aware financial applications
+
+---
+
+# 🙌 Built for the OPN Builder Program
+
+Developed as part of the OPN Builder Program to explore how privacy, escrow infrastructure, and decentralized prediction markets can be combined into a reusable on-chain primitive for the next generation of open finance applications.
