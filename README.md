@@ -227,7 +227,7 @@ Future upgrades will explore:
 ## Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/opn-shieldescrow.git
+git clone https://github.com/vijayashanthi1234/opn-shieldescrow.git
 
 cd opn-shieldescrow
 ```
