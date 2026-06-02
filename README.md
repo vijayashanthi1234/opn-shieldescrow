@@ -350,7 +350,7 @@ Planned improvements include:
 <img width="3829" height="1723" alt="image" src="https://github.com/user-attachments/assets/2971ce26-9e02-427c-8019-8c14cdca2b07" />
 
 
-### Contract Deployment
+### Deployment Details
 
 <img width="3789" height="1868" alt="image" src="https://github.com/user-attachments/assets/e65659d8-07b0-4a28-a28a-679ecc6e0aef" />
 
