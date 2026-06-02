@@ -340,13 +340,15 @@ Planned improvements include:
 
 <img width="3828" height="1949" alt="image" src="https://github.com/user-attachments/assets/9c96d703-a057-499e-8b00-3b5f7c9b8f5f" />
 
-### Deposit Flow
+### Roadmap
 
-*Add screenshot here*
+<img width="3810" height="2085" alt="image" src="https://github.com/user-attachments/assets/a7f56bbf-d0c3-4954-ad1b-cd16d5de3c7b" />
 
-### Claim Flow
 
-*Add screenshot here*
+### Architecture Diagram
+
+<img width="3829" height="1723" alt="image" src="https://github.com/user-attachments/assets/2971ce26-9e02-427c-8019-8c14cdca2b07" />
+
 
 ### Contract Deployment
 
