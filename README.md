@@ -332,7 +332,8 @@ Planned improvements include:
 
 ### Landing Page
 
-*Add screenshot here*
+<img width="3828" height="1949" alt="image" src="https://github.com/user-attachments/assets/9c96d703-a057-499e-8b00-3b5f7c9b8f5f" />
+
 
 ### Wallet Connection
 
