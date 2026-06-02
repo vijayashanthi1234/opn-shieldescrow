@@ -332,12 +332,13 @@ Planned improvements include:
 
 ### Landing Page
 
-<img width="3828" height="1949" alt="image" src="https://github.com/user-attachments/assets/9c96d703-a057-499e-8b00-3b5f7c9b8f5f" />
+<img width="3821" height="1924" alt="image" src="https://github.com/user-attachments/assets/cf44be30-e660-43de-86d4-9e4747435ff1" />
+
 
 
 ### Wallet Connection
 
-*Add screenshot here*
+<img width="3828" height="1949" alt="image" src="https://github.com/user-attachments/assets/9c96d703-a057-499e-8b00-3b5f7c9b8f5f" />
 
 ### Deposit Flow
 
