@@ -488,4 +488,3 @@ if (!secret || !amount) return alert("Please fill both Secret Phrase and Deposit
 try {
 statusBox.style.display = "block";
 statusBox.style.borderLeft = "4px solid #60a5fa";
-statusBox.innerText = "Generating cryptographic commitment (Keccak256)...";const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);statusBox.innerText = "Please confirm the transaction in your MetaMask wallet...";const tx = await contract.deposit(commitment, {value: ethers.utils.parseEther(amount)});statusBox.innerText = Transaction submitted! Pending on-chain execution... Hash: ${tx.hash};await tx.wait();statusBox.style.borderLeft = "4px solid #10b981";statusBox.innerText = 🟢 Success! Funds successfully locked in OPN ShieldEscrow. Tx: ${tx.hash};} catch (err) {console.error(err);statusBox.style.display = "block";statusBox.style.borderLeft = "4px solid #ef4444";statusBox.innerText = ❌ Error: ${err.data?.message || err.message};}}
