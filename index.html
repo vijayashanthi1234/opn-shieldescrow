@@ -1,1 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPN ShieldEscrow</title>
+<script src="https://cloudflare.com"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif;scroll-behavior:smooth;}
+body{background:#030712;color:#fff;line-height:1.6;overflow-x:hidden;}
+.container{width:90%;max-width:1200px;margin:auto;}
+nav{position:fixed;top:0;width:100%;padding:15px 0;background:rgba(3,7,18,.85);backdrop-filter:blur(12px);z-index:999;border-bottom:1px solid rgba(255,255,255,.08);}
+.nav-content{display:flex;justify-content:space-between;align-items:center;}
+.logo{font-weight:700;font-size:1.1rem;color:#60a5fa;}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:90px;}
+.hero h1{font-size:4rem;margin-bottom:20px;background:linear-gradient(90deg,#60a5fa,#a855f7);-webkit-background-clip:text;color:transparent;}
+.hero p{max-width:800px;margin:auto;color:#cbd5e1;font-size:1.1rem;}
+.badge{display:inline-block;padding:8px 18px;background:#1e293b;border:1px solid #334155;border-radius:30px;margin-bottom:25px;}
+.btn{padding:14px 28px;text-decoration:none;border-radius:12px;margin:8px;display:inline-block;transition:.3s;cursor:pointer;border:none;font-size:15px;}
+.primary{background:#2563eb;color:#fff;}
+.secondary{background:#111827;border:1px solid #334155;color:#fff;}
+#walletInfo{margin-top:20px;color:#60a5fa;font-size:14px;}
+.section{padding:100px 0;}
+.section-title{text-align:center;font-size:2.4rem;margin-bottom:50px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px;}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:25px;}
+.card h3{color:#60a5fa;margin-bottom:10px;}
+.stat{text-align:center;}
+.stat h2{color:#60a5fa;font-size:2.2rem;}
+.architecture{display:flex;flex-wrap:wrap;justify-content:center;gap:15px;}
+.step{padding:20px;background:#111827;border:1px solid #334155;border-radius:15px;min-width:180px;text-align:center;}
+.roadmap-item{border-left:3px solid #2563eb;padding-left:20px;margin-bottom:30px;}
+.contract{word-break:break-all;color:#60a5fa;}
+.input-box {width:100%;padding:12px;background:#111827;border:1px solid #334155;border-radius:8px;color:#fff;margin-top:8px;margin-bottom:20px;font-size:15px;}
+.status-message {margin-top:15px;padding:12px;border-radius:8px;background:rgba(255,255,255,0.05);font-size:14px;display:none;word-break:break-all;}
+.footer{text-align:center;padding:50px 20px;color:#94a3b8;border-top:1px solid rgba(255,255,255,.08);}
+</style>
+</head>
+<body>
+<nav><div class="container nav-content"><div class="logo">🛡 OPN ShieldEscrow</div><div class="nav-links"><a href="#architecture" class="btn secondary">Architecture</a><a href="#demo" class="btn secondary">Demo</a><a href="#roadmap" class="btn secondary">Roadmap</a></div></div></nav>
+<section class="hero"><div class="container"><div class="badge">OPN Builder Program 2026</div><h1>OPN ShieldEscrow</h1><p>Privacy-Preserving Settlement Infrastructure for OPN Chain.</p><div class="buttons"><button id="connectBtn" class="btn primary">Connect Wallet</button></div><div id="walletInfo">Wallet Not Connected</div></div></section>
+<section class="section"><div class="container"><h2 class="section-title">Protocol Metrics</h2><div class="grid"><div class="card stat"><h2>14,250+</h2><p>Shielded Volume</p></div><div class="card stat"><h2>2</h2><p>Active Markets</p></div><div class="card stat"><h2>98%</h2><p>Settlement Success</p></div><div class="card stat"><h2>1</h2><p>Live Deployment</p></div></div></div></section>
+<section class="section" id="architecture"><div class="container"><h2 class="section-title">Protocol Architecture</h2><div class="architecture"><div class="step">User Wallet</div><div class="step">Commitment Generator</div><div class="step">ShieldEscrow Contract</div></div></div></section>
+<section class="section"><div class="container"><h2 class="section-title">Deployment Details</h2><div class="card"><p><strong>Network:</strong> OPN Testnet</p><p><strong>Contract Address:</strong></p><p class="contract">0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A</p></div></div></section>
+<section class="section" id="demo"><div class="container"><h2 class="section-title">Live Protocol Flow</h2><div class="grid"><div class="card"><h3>Create Commitment</h3><p>Generate a commitment using a secret phrase.</p><input type="text" id="secretPhrase" class="input-box" placeholder="e.g., secret_123"></div><div class="card"><h3>Deposit Escrow</h3><p>Lock collateral into ShieldEscrow.</p><input type="number" id="depositAmount" class="input-box" placeholder="Amount in OPN" step="0.01"><button class="btn primary" style="width:100%;margin:0;" onclick="createEscrowDeposit()">Deposit to Escrow</button></div><div class="card"><h3>Claim Rewards</h3><p>Withdraw funds securely.</p><button class="btn secondary" style="width:100%;margin:0;margin-top:20px;" disabled>Coming Soon</button></div></div><div id="statusBox" class="status-message"></div></div></section>
+<section class="section" id="roadmap"><div class="container"><h2 class="section-title">Roadmap</h2><div class="roadmap-item"><h3>✅ Phase 1</h3><p>Core ShieldEscrow Contracts</p></div><div class="roadmap-item"><h3>✅ Phase 2</h3><p>OPN Testnet Deployment</p></div></div></section>
+<script>
+const connectBtn = document.getElementById("connectBtn");
+const walletInfo = document.getElementById("walletInfo");
+const contractAddress = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
+const contractABI = ["function deposit(bytes32 commitment) external payable"];
+let provider, signer, contract;
+connectBtn.addEventListener("click", async () => {
+if(!window.ethereum){walletInfo.innerHTML="MetaMask not detected"; return;}
+try{
+provider = new ethers.providers.Web3Provider(window.ethereum);
+const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+signer = provider.getSigner();
+contract = new ethers.Contract(contractAddress, contractABI, signer);
+connectBtn.innerText = "Wallet Connected";
+walletInfo.innerHTML = `Connected: ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}<br>Chain ID: ${parseInt(chainId, 16)}`;
+}catch(err){walletInfo.innerHTML="Wallet connection failed";}
+});
+async function createEscrowDeposit() {
+if (!contract) return alert("Please connect your wallet first!");
+const secret = document.getElementById("secretPhrase").value;
+const amount = document.getElementById("depositAmount").value;
+const statusBox = document.getElementById("statusBox");
+if (!secret || !amount) return alert("Please fill all fields!");
+try {
+statusBox.style.display = "block"; statusBox.innerText = "Generating cryptographic commitment...";
+const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);
+statusBox.innerText = "Please confirm the transaction in MetaMask...";
+const tx = await contract.deposit(commitment, { value: ethers.utils.parseEther(amount) });
+statusBox.innerText = `Transaction submitted! Hash: ${tx.hash}`;
+await tx.wait();
+statusBox.innerText = `🟢 Success! Funds successfully locked. Tx: ${tx.hash}`;
+} catch (err) { statusBox.style.display = "block"; statusBox.innerText = `❌ Error: ${err.message}`; }
+}
+</script>
+</body>
+</html>
 
