@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OPN ShieldEscrow</title>
-<!-- Ethers.js லைப்ரரி இணைக்கப்பட்டுள்ளது -->
+<!-- சரியான Ethers.js லைப்ரரி இணைக்கப்பட்டுள்ளது -->
 <script src="https://cloudflare.com"></script>
 
 <style>
@@ -218,7 +218,6 @@ word-break:break-all;
 color:#60a5fa;
 }
 
-/* புதிய போர்ட்டல் படிவத்திற்கான ஸ்டைல் */
 .input-box {
 width: 100%;
 padding: 12px;
@@ -230,6 +229,7 @@ margin-top: 8px;
 margin-bottom: 20px;
 font-size: 15px;
 }
+
 .status-message {
 margin-top: 15px;
 padding: 12px;
@@ -248,16 +248,13 @@ border-top:1px solid rgba(255,255,255,.08);
 }
 
 @media(max-width:768px){
-
 .hero h1{
 font-size:2.6rem;
 }
-
 .nav-content{
 flex-direction:column;
 gap:15px;
 }
-
 .nav-links{
 display:flex;
 flex-wrap:wrap;
@@ -271,252 +268,188 @@ justify-content:center;
 
 <nav>
 <div class="container nav-content">
-
 <div class="logo">
 🛡 OPN ShieldEscrow
 </div>
-
 <div class="nav-links">
 <a href="#architecture" class="btn secondary">Architecture</a>
 <a href="#demo" class="btn secondary">Demo</a>
 <a href="#roadmap" class="btn secondary">Roadmap</a>
 <a href="https://github.com/vijayashanthi1234/opn-shieldescrow" class="btn primary">GitHub</a>
 </div>
-
 </div>
 </nav>
 
 <section class="hero">
 <div class="container">
-
 <div class="badge">
 OPN Builder Program 2026
 </div>
-
 <h1>OPN ShieldEscrow</h1>
-
 <p>
 Privacy-Preserving Settlement Infrastructure for OPN Chain.
 A commit-reveal escrow architecture enabling confidential participation,
 settlement and reward distribution for decentralized prediction markets.
 </p>
-
 <div class="buttons">
-
 <a href="https://github.com/vijayashanthi1234/opn-shieldescrow" class="btn primary">
 GitHub Repository
 </a>
-
 <a href="#architecture" class="btn secondary">
 View Architecture
 </a>
-
 <button id="connectBtn" class="btn primary">
 Connect Wallet
 </button>
-
 </div>
-
 <div id="walletInfo">
 Wallet Not Connected
 </div>
-
 </div>
 </section>
 
 <section class="section">
 <div class="container">
-
 <h2 class="section-title">Protocol Metrics</h2>
-
 <div class="grid">
-
 <div class="card stat">
 <h2>14,250+</h2>
 <p>Shielded Volume</p>
 </div>
-
 <div class="card stat">
 <h2>2</h2>
 <p>Active Markets</p>
 </div>
-
 <div class="card stat">
 <h2>98%</h2>
 <p>Settlement Success</p>
 </div>
-
 <div class="card stat">
 <h2>1</h2>
 <p>Live Deployment</p>
 </div>
-
 </div>
-
 </div>
 </section>
 
 <section class="section" id="architecture">
 <div class="container">
-
 <h2 class="section-title">Protocol Architecture</h2>
-
 <div class="architecture">
-
 <div class="step">User Wallet</div>
 <div class="step">Commitment Generator</div>
 <div class="step">ShieldEscrow Contract</div>
 <div class="step">Market Resolution</div>
 <div class="step">Claim Verification</div>
 <div class="step">Reward Distribution</div>
-
 </div>
-
 </div>
 </section>
 
 <section class="section">
 <div class="container">
-
 <h2 class="section-title">Why OPN Chain?</h2>
-
 <div class="grid">
-
 <div class="card">
 <h3>Fast Settlement</h3>
 <p>Rapid block confirmation improves prediction market UX.</p>
 </div>
-
 <div class="card">
 <h3>Low Transaction Fees</h3>
 <p>Efficient execution allows frequent escrow interactions.</p>
 </div>
-
 <div class="card">
 <h3>Privacy Vision</h3>
 <p>Designed to align with future NeoID and privacy primitives.</p>
 </div>
-
 <div class="card">
 <h3>Builder Ecosystem</h3>
 <p>Created specifically for innovation inside the OPN ecosystem.</p>
 </div>
-
 </div>
-
 </div>
 </section>
 
 <section class="section">
 <div class="container">
-
 <h2 class="section-title">Deployment Details</h2>
-
 <div class="card">
-
 <p><strong>Network:</strong> OPN Testnet</p>
 <p><strong>Compiler:</strong> Solidity 0.8.20</p>
 <p><strong>Deployment Block:</strong> 17487995</p>
-
 <br>
-
 <p><strong>Contract Address:</strong></p>
-
 <p class="contract">
 0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A
 </p>
-
 </div>
-
 </div>
 </section>
 
-<!-- திருத்தப்பட்ட நேரடிப் பயன்பாட்டுப் பகுதி (Interactive Demo) -->
 <section class="section" id="demo">
 <div class="container">
-
 <h2 class="section-title">Live Protocol Flow</h2>
-
 <div class="grid">
-
 <div class="card">
 <h3>Create Commitment</h3>
 <p>Generate a cryptographic commitment using a private secret phrase.</p>
 <input type="text" id="secretPhrase" class="input-box" placeholder="e.g., my_secret_phrase_123">
 </div>
-
 <div class="card">
 <h3>Deposit Escrow</h3>
 <p>Lock collateral into ShieldEscrow using commitment-based verification.</p>
 <input type="number" id="depositAmount" class="input-box" placeholder="Amount in OPN (e.g., 0.1)" step="0.01">
 <button class="btn primary" style="width:100%; margin:0;" onclick="createEscrowDeposit()">Deposit to Escrow</button>
 </div>
-
 <div class="card">
 <h3>Claim Rewards</h3>
 <p>Reveal the original secret and securely withdraw funds.</p>
 <button class="btn secondary" style="width:100%; margin:0; margin-top:20px;" disabled>Feature Coming Soon</button>
 </div>
-
 </div>
-
 <div id="statusBox" class="status-message"></div>
-
 </div>
 </section>
 
 <section class="section" id="roadmap">
 <div class="container">
-
 <h2 class="section-title">Roadmap</h2>
-
 <div class="roadmap-item">
 <h3>✅ Phase 1</h3>
 <p>Core ShieldEscrow Contracts</p>
 </div>
-
 <div class="roadmap-item">
 <h3>✅ Phase 2</h3>
 <p>OPN Testnet Deployment</p>
 </div>
-
 <div class="roadmap-item">
 <h3>🚧 Phase 3</h3>
 <p>Oracle Integration & Automated Settlement</p>
 </div>
-
 <div class="roadmap-item">
 <h3>🚧 Phase 4</h3>
 <p>NeoID & Zero-Knowledge Commitments</p>
 </div>
-
 <div class="roadmap-item">
 <h3>🔭 Phase 5</h3>
 <p>Privacy Infrastructure SDK for OPN Developers</p>
 </div>
-
 </div>
 </section>
 
 <footer class="footer">
-
 <p>Built for the OPN Builder Program</p>
-
 <br>
-
 <a href="https://github.com/vijayashanthi1234/opn-shieldescrow" style="color:#60a5fa;">
 GitHub Repository
 </a>
-
 </footer>
 
-<!-- ஸ்மார்ட் காண்ட்ராக்ட்டை இயக்கும் மேம்படுத்தப்பட்ட ஜாவாஸ்கிரிப்ட் -->
 <script>
 const connectBtn = document.getElementById("connectBtn");
 const walletInfo = document.getElementById("walletInfo");
 const contractAddress = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
 
-// காண்ட்ராக்ட் ஏபிஐ (ABI)
 const contractABI = [
 "function deposit(bytes32 commitment) external payable"
 ];
@@ -535,9 +468,11 @@ const chainId = await provider.send("eth_chainId", []);
 signer = provider.getSigner();
 contract = new ethers.Contract(contractAddress, contractABI, signer);
 
+const userAddr = accounts[0];
 connectBtn.innerText = "Wallet Connected";
-walletInfo.innerHTML = `Connected: ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}<br>Chain ID: ${chainId}`;
+walletInfo.innerHTML = `Connected: ${userAddr.slice(0,6)}...${userAddr.slice(-4)}<br>Chain ID: ${chainId}`;
 }catch(err){
+console.error(err);
 walletInfo.innerHTML="Wallet connection failed";
 }
 });
@@ -548,3 +483,9 @@ const secret = document.getElementById("secretPhrase").value;
 const amount = document.getElementById("depositAmount").value;
 const statusBox = document.getElementById("statusBox");
 
+if (!secret || !amount) return alert("Please fill both Secret Phrase and Deposit Amount!");
+
+try {
+statusBox.style.display = "block";
+statusBox.style.borderLeft = "4px solid #60a5fa";
+statusBox.innerText = "Generating cryptographic commitment (Keccak256)...";const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);statusBox.innerText = "Please confirm the transaction in your MetaMask wallet...";const tx = await contract.deposit(commitment, {value: ethers.utils.parseEther(amount)});statusBox.innerText = Transaction submitted! Pending on-chain execution... Hash: ${tx.hash};await tx.wait();statusBox.style.borderLeft = "4px solid #10b981";statusBox.innerText = 🟢 Success! Funds successfully locked in OPN ShieldEscrow. Tx: ${tx.hash};} catch (err) {console.error(err);statusBox.style.display = "block";statusBox.style.borderLeft = "4px solid #ef4444";statusBox.innerText = ❌ Error: ${err.data?.message || err.message};}}
