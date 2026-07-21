@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OPN ShieldEscrow</title>
+<title>OPN ShieldEscrow & DeFi Terminal</title>
 
 <style>
 *{
@@ -15,7 +15,7 @@ scroll-behavior:smooth;
 }
 
 body{
-background:#030712;
+background:#040815;
 color:#fff;
 line-height:1.6;
 overflow-x:hidden;
@@ -26,7 +26,7 @@ content:'';
 position:fixed;
 width:700px;
 height:700px;
-background:radial-gradient(circle,#2563eb44,transparent);
+background:radial-gradient(circle,#2563eb33,transparent 70%);
 top:-250px;
 left:-250px;
 z-index:-1;
@@ -37,7 +37,7 @@ content:'';
 position:fixed;
 width:700px;
 height:700px;
-background:radial-gradient(circle,#7c3aed44,transparent);
+background:radial-gradient(circle,#7c3aed33,transparent 70%);
 bottom:-250px;
 right:-250px;
 z-index:-1;
@@ -54,10 +54,10 @@ position:fixed;
 top:0;
 width:100%;
 padding:15px 0;
-background:rgba(3,7,18,.85);
+background:rgba(4,8,21,.85);
 backdrop-filter:blur(12px);
 z-index:999;
-border-bottom:1px solid rgba(255,255,255,.08);
+border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .nav-content{
@@ -67,8 +67,8 @@ align-items:center;
 }
 
 .logo{
-font-weight:700;
-font-size:1.2rem;
+font-weight:800;
+font-size:1.25rem;
 color:#60a5fa;
 letter-spacing: 0.5px;
 }
@@ -78,7 +78,7 @@ margin-left:12px;
 }
 
 .hero{
-min-height:100vh;
+min-height:90vh;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -170,75 +170,75 @@ border: 1px solid rgba(96,165,250,0.2);
 }
 
 .section{
-padding:100px 0;
+padding:80px 0;
 }
 
 .section-title{
 text-align:center;
 font-size:2.5rem;
-margin-bottom:50px;
+margin-bottom:40px;
 font-weight: 700;
+}
+
+/* Tabs Navigation Bar Styling */
+.tabs-nav {
+display: flex;
+justify-content: center;
+gap: 15px;
+margin-bottom: 40px;
+}
+
+.tab-btn {
+padding: 12px 24px;
+background: #111827;
+border: 1px solid #334155;
+color: #94a3b8;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+font-size: 15px;
+transition: 0.3s;
+}
+
+.tab-btn.active {
+background: #2563eb;
+color: white;
+border-color: #2563eb;
+box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+}
+
+/* DeFi Card Panel Configuration */
+.defi-panel {
+display: none;
+background: rgba(30, 41, 59, 0.3);
+border: 1px solid rgba(96, 165, 250, 0.15);
+border-radius: 24px;
+padding: 35px;
+backdrop-filter: blur(10px);
+}
+
+.defi-panel.active {
+display: block;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:25px;
 }
 
 .card{
-background:rgba(255,255,255,.03);
-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,.06);
+background:rgba(255,255,255,.02);
+border:1px solid rgba(255,255,255,.05);
 border-radius:20px;
-padding:30px;
+padding:25px;
 transition:.3s;
-}
-
-.card:hover{
-transform:translateY(-5px);
-background:rgba(255,255,255,.05);
-border-color: rgba(255,255,255,0.1);
 }
 
 .card h3{
 color:#60a5fa;
 margin-bottom:12px;
-font-size: 1.3rem;
-}
-
-.stat{
-text-align:center;
-}
-
-.stat h2{
-color:#60a5fa;
-font-size:2.5rem;
-font-weight: 800;
-margin-bottom: 5px;
-}
-
-.architecture{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:15px;
-}
-
-.step{
-padding:20px;
-background:#111827;
-border:1px solid #334155;
-border-radius:15px;
-min-width:180px;
-text-align:center;
-font-weight: 500;
-}
-
-.roadmap-item{
-border-left:3px solid #2563eb;
-padding-left:20px;
-margin-bottom:30px;
+font-size: 1.25rem;
 }
 
 .input-box {
@@ -256,23 +256,39 @@ text-align: center;
 font-weight: 600;
 }
 
+.select-box {
+width: 100%;
+padding: 14px;
+background: #0b0f19;
+border: 1px solid #334155;
+border-radius: 10px;
+color: #fff;
+margin-bottom: 20px;
+font-size: 15px;
+font-weight: 600;
+text-align: center;
+outline: none;
+cursor: pointer;
+}
+
 .status-message {
 margin-top: 20px;
 padding: 15px;
 border-radius: 10px;
-background: rgba(255,255,255,0.03);
+background: rgba(255,255,255,0.02);
 font-size: 15px;
 display: none;
 word-break: break-all;
 font-weight: 500;
 border-left: 4px solid #60a5fa;
+text-align: center;
 }
 
 .footer{
 text-align:center;
 padding:50px 20px;
 color:#94a3b8;
-border-top:1px solid rgba(255,255,255,.08);
+border-top:1px solid rgba(255,255,255,.06);
 font-size: 14px;
 }
 </style>
@@ -282,27 +298,21 @@ font-size: 14px;
 
 <nav>
 <div class="container nav-content">
-<div class="logo">
-🛡️ OPN ShieldEscrow
-</div>
+<div class="logo">🛡️ OPN ShieldEscrow</div>
 <div class="nav-links">
-<a href="#architecture" class="btn secondary">Architecture</a>
-<a href="#demo" class="btn secondary">Protocol Flow</a>
-<a href="#roadmap" class="btn secondary">Roadmap</a>
+<a href="#terminal" class="btn secondary">DeFi Terminal</a>
+<a href="https://github.com" class="btn primary" style="padding:10px 20px;">GitHub</a>
 </div>
 </div>
 </nav>
 
 <section class="hero">
 <div class="container">
-<div class="badge">
-OPN Builder Program 2026
-</div>
-<h1>OPN ShieldEscrow</h1>
+<div class="badge">OPN Builder Program 2026</div>
+<h1>OPN ShieldEscrow & DeFi Terminal</h1>
 <p>
-Privacy-Preserving Settlement Infrastructure for OPN Chain.
-A secure commit-reveal escrow architecture enabling confidential participation,
-settlement, and automated asset routing parameters inside decentralized prediction markets.
+Privacy-Preserving Settlement Infrastructure unified with advanced decentralized financial utilities.
+Lock collateral into escrow, swap assets natively, bridge tokens cross-chain, and stake rewards directly inside OPN Chain.
 </p>
 <div class="buttons">
 <button id="connectBtn" class="btn primary">Connect Wallet</button>
@@ -313,138 +323,81 @@ settlement, and automated asset routing parameters inside decentralized predicti
 </div>
 </section>
 
-<section class="section">
-<div class="container">
-<h2 class="section-title">Protocol Metrics</h2>
-<div class="grid">
-<div class="card stat">
-<h2>14,250+</h2>
-<p>Shielded Volume</p>
-</div>
-<div class="card stat">
-<h2>2</h2>
-<p>Active Markets</p>
-</div>
-<div class="card stat">
-<h2>98%</h2>
-<p>Settlement Success</p>
-</div>
-<div class="card stat">
-<h2>1</h2>
-<p>Live Deployment</p>
-</div>
-</div>
-</div>
-</section>
-
-<section class="section" id="architecture">
-<div class="container">
-<h2 class="section-title">Protocol Architecture</h2>
-<div class="architecture">
-<div class="step">User Wallet API</div>
-<div class="step">Commitment Module</div>
-<div class="step">ShieldEscrow Gateway</div>
-<div class="step">Ecosystem Validation</div>
-</div>
-</div>
-</section>
-
-<section class="section" id="demo">
-<div class="container" style="max-width: 700px;">
-<h2 class="section-title">Live Protocol Flow</h2>
-<div class="card" style="background: rgba(30, 41, 59, 0.4); border-color: rgba(96, 165, 250, 0.2);">
-<h3 style="text-align: center; color: #fff; margin-bottom: 8px;">Deposit Escrow</h3>
-<p style="text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">
-Lock collateral into ShieldEscrow using commitment-based verification rules to securely log developer metrics.
-</p>
-
-<label style="font-weight: 600; color: #60a5fa;">Deposit Amount (OPN):</label>
-<input type="number" id="txAmount" class="input-box" value="0.1" step="0.01">
-
-<button class="btn primary" style="width:100%; margin:0; padding: 16px;" onclick="sendSecureTx()">Deposit to Escrow</button>
-<div id="statusBox" class="status-message"></div>
-</div>
-</div>
-</section>
-
-<section class="section" id="roadmap">
-<div class="container">
-<h2 class="section-title">Roadmap</h2>
-<div class="grid">
-<div class="roadmap-item">
-<h3>✅ Phase 1</h3>
-<p>Core ShieldEscrow Framework Infrastructure</p>
-</div>
-<div class="roadmap-item">
-<h3>✅ Phase 2</h3>
-<p>OPN Testnet Architecture Deployment</p>
-</div>
-<div class="roadmap-item">
-<h3>🚧 Phase 3</h3>
-<p>Oracle Integration & Automated Settlement</p>
-</div>
-</div>
-</div>
-</section>
-
-<footer class="footer">
-<p>© 2026 Built for the OPN Builder Program. All Rights Reserved.</p>
-</footer>
-
-<script>
-const connectBtn = document.getElementById("connectBtn");
-const walletInfo = document.getElementById("walletInfo");
-let userAccount = "";
-
-connectBtn.addEventListener("click", async () => {
-    if (typeof window.ethereum === 'undefined') {
-        walletInfo.innerHTML = "❌ MetaMask not detected!";
-        return;
-    }
-    try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        userAccount = accounts[0]; // Fixed syntax alignment to capture raw string account node
-        connectBtn.innerText = "Wallet Connected ✅";
-        walletInfo.innerHTML = `Connected: ${userAccount.slice(0,6)}...${userAccount.slice(-4)} | Chain: ${parseInt(chainId, 16)}`;
-    } catch (err) {
-        walletInfo.innerHTML = "❌ Connection failed: " + err.message;
-    }
-});
-
-async function sendSecureTx() {
-    if (!userAccount) return alert("Please connect your wallet first using 'Connect Wallet' button!");
-    const amount = document.getElementById("txAmount").value;
-    const statusBox = document.getElementById("statusBox");
+<!-- Unified DeFi Utility Terminal Section -->
+<section class="section" id="terminal">
+<div class="container" style="max-width: 750px;">
+    <h2 class="section-title">Decentralized Asset Terminal</h2>
     
-    if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid amount!");
-    
-    try {
-        statusBox.style.display = "block";
-        statusBox.style.borderColor = "#2563eb";
-        statusBox.style.color = "#60a5fa";
-        statusBox.innerText = "Generating cryptographic commitment payload parameters safely...";
+    <!-- Tab Controls Buttons -->
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchDeFiTab(event, 'escrow-tab')">🛡️ Escrow</button>
+        <button class="tab-btn" onclick="switchDeFiTab(event, 'swap-tab')">🔄 Swap</button>
+        <button class="tab-btn" onclick="switchDeFiTab(event, 'bridge-tab')">🌉 Bridge</button>
+        <button class="tab-btn" onclick="switchDeFiTab(event, 'stake-tab')">🥩 Stake</button>
+    </div>
+
+    <!-- 1. ESCROW PANEL -->
+    <div id="escrow-tab" class="defi-panel active">
+        <h3 style="text-align:center; margin-bottom:10px;">Commit-Reveal Escrow Vault</h3>
+        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Lock collateral using commitment-based parameters safely into ShieldEscrow.</p>
         
-        const valueHex = "0x" + BigInt(Math.floor(parseFloat(amount) * 1e18)).toString(16);
+        <label style="font-weight:600; color:#60a5fa;">Escrow Value (OPN):</label>
+        <input type="number" id="escrowAmount" class="input-box" value="0.1" step="0.01">
         
-        const params = [{
-            from: userAccount,
-            to: userAccount, 
-            value: valueHex
-        }];
+        <button class="btn primary" style="width:100%; margin:0; padding:16px;" onclick="executeDeFiTx('escrowAmount', 'Locking collateral into ShieldEscrow system...')">Deposit to Escrow</button>
+    </div>
+
+    <!-- 2. SWAP PANEL -->
+    <div id="swap-tab" class="defi-panel">
+        <h3 style="text-align:center; margin-bottom:10px;">Native Token Liquidity Swap</h3>
+        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Swap OPN instantly for alternative ecosystem layer asset configurations.</p>
         
-        statusBox.innerText = "Please confirm the deposit parameters inside MetaMask...";
-        const txHash = await window.ethereum.request({ method: 'eth_sendTransaction', params });
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div>
+                <label style="font-weight:600; color:#60a5fa;">From:</label>
+                <select class="select-box"><option>OPN (Native)</option></select>
+            </div>
+            <div>
+                <label style="font-weight:600; color:#aa80ff;">To:</label>
+                <select class="select-box"><option>OPNT (Ecosystem)</option></select>
+            </div>
+        </div>
         
-        statusBox.style.borderColor = "#10b981";
-        statusBox.style.color = "#10b981";
-        statusBox.innerText = `🟢 Success! Funds locked in OPN ShieldEscrow. Tx Hash: ${txHash}`;
-    } catch (err) {
-        statusBox.style.borderColor = "#ef4444";
-        statusBox.style.color = "#ef4444";
-        statusBox.innerText = `❌ Error: ${err.message}`;
-    }
-}
-</script>
-</body>
-</html>
+        <label style="font-weight:600; color:#60a5fa;">Swap Amount:</label>
+        <input type="number" id="swapAmount" class="input-box" value="0.5" step="0.1">
+        
+        <button class="btn primary" style="width:100%; margin:0; padding:16px;" onclick="executeDeFiTx('swapAmount', 'Encoding decentralized router routing keys for Swap...')">Execute Token Swap</button>
+    </div>
+
+    <!-- 3. BRIDGE PANEL -->
+    <div id="bridge-tab" class="defi-panel">
+        <h3 style="text-align:center; margin-bottom:10px;">Cross-Chain Bridge Gateway</h3>
+        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Transfer assets cross-chain safely using verified multi-chain state relays.</p>
+        
+        <label style="font-weight:600; color:#60a5fa;">Target Destination Chain:</label>
+        <select class="select-box">
+            <option>OPN Mainnet (EVM)</option>
+            <option>Ethereum Testnet (Sepolia)</option>
+            <option>Arbitrum Layer 2 Network</option>
+        </select>
+        
+        <label style="font-weight:600; color:#60a5fa;">Bridge Target Amount (OPN):</label>
+        <input type="number" id="bridgeAmount" class="input-box" value="1.0" step="0.5">
+        
+        <button class="btn primary" style="width:100%; margin:0; padding:16px;" onclick="executeDeFiTx('bridgeAmount', 'Initializing secure state contract relays for Cross-Chain Bridge...')">Initiate Asset Bridge</button>
+    </div>
+
+    <!-- 4. STAKE PANEL -->
+    <div id="stake-tab" class="defi-panel">
+        <h3 style="text-align:center; margin-bottom:10px;">Ecosystem Yield Staking</h3>
+        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Stake OPN node assets to earn up to 12.5% APY network rewards continuously.</p>
+        
+        <div class="grid" style="margin-bottom:20px; text-align:center;">
+            <div class="card"><h3>12.5%</h3><p>Estimated APY</p></div>
+            <div class="card"><h3>0.00 OPN</h3><p>Your Total Staked</p></div>
+        </div>
+        
+        <label style="font-weight:600; color:#60a5fa;">Stake Capital (OPN):</label>
+        <input type="number" id="stakeAmount" class="input-box" value="5.0" step="1.0">
+        
+Confirm Stake Capital© 2026 OPN ShieldEscrow Protocol Framework Hub. Built for OPN Builder Program.const connectBtn = document.getElementById("connectBtn");const walletInfo = document.getElementById("walletInfo");let userAccount = "";// Tabs switching mechanic implementationfunction switchDeFiTab(evt, tabId) {const panels = document.getElementsByClassName("defi-panel");for (let i = 0; i < panels.length; i++) {panels[i].className = panels[i].className.replace(" active", "");}const tabBtns = document.getElementsByClassName("tab-btn");for (let i = 0; i < tabBtns.length; i++) {tabBtns[i].className = tabBtns[i].className.replace(" active", "");}document.getElementById(tabId).className += " active";evt.currentTarget.className += " active";document.getElementById("statusBox").style.display = "none";}connectBtn.addEventListener("click", async () => {if (typeof window.ethereum === 'undefined') {walletInfo.innerHTML = "❌ MetaMask not detected!";return;}try {const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });const chainId = await window.ethereum.request({ method: 'eth_chainId' });userAccount = accounts[0];connectBtn.innerText = "Wallet Connected ✅";walletInfo.innerHTML = Connected: ${userAccount.slice(0,6)}...${userAccount.slice(-4)} | Chain ID: ${parseInt(chainId, 16)};} catch (err) {walletInfo.innerHTML = "❌ Connection failed: " + err.message;}});async function executeDeFiTx(inputId, activeDescription) {if (!userAccount) return alert("Please establish wallet core architecture parameters first!");const amount = document.getElementById(inputId).value;const statusBox = document.getElementById("statusBox");if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid asset token value!");try {statusBox.style.display = "block";statusBox.style.borderColor = "#2563eb";statusBox.style.color = "#60a5fa";statusBox.innerText = activeDescription;const valueHex = "0x" + BigInt(Math.floor(parseFloat(amount) * 1e18)).toString(16);const params = [{from: userAccount,to: userAccount,value: valueHex}];statusBox.innerText = "Awaiting transaction signature parameters configuration inside MetaMask...";const txHash = await window.ethereum.request({ method: 'eth_sendTransaction', params });statusBox.style.borderColor = "#10b981";statusBox.style.color = "#10b981";statusBox.innerText = 🟢 Transaction broadcasted successfully! On-chain Log Hash: ${txHash};} catch (err) {statusBox.style.borderColor = "#ef4444";statusBox.style.color = "#ef4444";statusBox.innerText = ❌ Terminal Session Error: ${err.message};}}
