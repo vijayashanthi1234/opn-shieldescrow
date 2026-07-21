@@ -5,165 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OPN ShieldEscrow</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,sans-serif;scroll-behavior:smooth;}
-body{background:#030712;color:#fff;line-height:1.6;overflow-x:hidden;}
-body::before{content:'';position:fixed;width:700px;height:700px;background:radial-gradient(circle,#2563eb55,transparent);top:-250px;left:-250px;z-index:-1;}
-body::after{content:'';position:fixed;width:700px;height:700px;background:radial-gradient(circle,#7c3aed55,transparent);bottom:-250px;right:-250px;z-index:-1;}
-.container{width:90%;max-width:1200px;margin:auto;}
-nav{position:fixed;top:0;width:100%;padding:15px 0;background:rgba(3,7,18,.85);backdrop-filter:blur(12px);z-index:999;border-bottom:1px solid rgba(255,255,255,.08);}
-.nav-content{display:flex;justify-content:space-between;align-items:center;}
-.logo{font-weight:700;font-size:1.1rem;color:#60a5fa;}
-.nav-links a{margin-left:12px;}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:90px;}
-.hero h1{font-size:4rem;margin-bottom:20px;background:linear-gradient(90deg,#60a5fa,#a855f7);-webkit-background-clip:text;color:transparent;}
-.hero p{max-width:800px;margin:auto;color:#cbd5e1;font-size:1.1rem;}
-.badge{display:inline-block;padding:8px 18px;background:#1e293b;border:1px solid #334155;border-radius:30px;margin-bottom:25px;}
-.buttons{margin-top:35px;}
-.btn{padding:14px 28px;text-decoration:none;border-radius:12px;margin:8px;display:inline-block;transition:.3s;cursor:pointer;border:none;font-size:15px;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,sans-serif;}
+body{background:#030712;color:#fff;line-height:1.6;text-align:center;padding-top:100px;}
+.container{width:90%;max-width:600px;margin:auto;background:rgba(255,255,255,0.05);padding:40px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);}
+.btn{padding:14px 28px;border-radius:12px;cursor:pointer;border:none;font-size:15px;font-weight:bold;margin-top:20px;width:100%;}
 .primary{background:#2563eb;color:#fff;}
-.secondary{background:#111827;border:1px solid #334155;color:#fff;}
-.btn:hover{transform:translateY(-3px);}
-#walletInfo{margin-top:20px;color:#60a5fa;font-size:14px;font-family: monospace;}
-.section{padding:100px 0;}
-.section-title{text-align:center;font-size:2.4rem;margin-bottom:50px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px;}
-.card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:25px;transition:.3s;}
-.card:hover{transform:translateY(-5px);}
-.card h3{color:#60a5fa;margin-bottom:10px;}
-.stat{text-align:center;}
-.stat h2{color:#60a5fa;font-size:2.2rem;}
-.architecture{display:flex;flex-wrap:wrap;justify-content:center;gap:15px;}
-.step{padding:20px;background:#111827;border:1px solid #334155;border-radius:15px;min-width:180px;text-align:center;}
-.contract{word-break:break-all;color:#60a5fa;}
-.input-box {width: 100%;padding: 12px;background: #111827;border: 1px solid #334155;border-radius: 8px;color: #fff;margin-top: 8px;margin-bottom: 20px;font-size: 15px;}
-.status-message {margin-top: 15px;padding: 12px;border-radius: 8px;background: rgba(255,255,255,0.05);font-size: 14px;display: none;word-break: break-all;}
-.footer{text-align:center;padding:50px 20px;color:#94a3b8;border-top:1px solid rgba(255,255,255,.08);}
+#walletInfo{margin-top:20px;color:#60a5fa;}
+.input-box {width: 100%;padding:12px;background:#111827;border:1px solid #334155;border-radius:8px;color:#fff;margin-top:20px;}
 </style>
 </head>
 <body>
-
-<nav>
-<div class="container nav-content">
-<div class="logo">🛡 OPN ShieldEscrow</div>
-<div class="nav-links">
-<a href="#architecture" class="btn secondary">Architecture</a>
-<a href="#demo" class="btn secondary">Demo</a>
-</div>
-</div>
-</nav>
-
-<section class="hero">
 <div class="container">
-<div class="badge">OPN Builder Program 2026</div>
-<h1>OPN ShieldEscrow</h1>
-<p>Privacy-Preserving Settlement Infrastructure for OPN Chain.</p>
-<div class="buttons"><button id="connectBtn" class="btn primary">Connect Wallet</button></div>
-<div id="walletInfo">Wallet Not Connected</div>
+    <h1>🛡️ OPN Secure Tx Gateway</h1>
+    <p style="color: #cbd5e1; margin-top:10px;">Execute 100% safe verified on-chain transactions directly to log your decentralized developer builder points.</p>
+    <button id="connectBtn" class="btn primary">Connect Wallet</button>
+    <div id="walletInfo">Wallet Not Connected</div>
+    <input type="number" id="txAmount" class="input-box" value="0.1" step="0.01">
+    <button class="btn primary" onclick="sendSecureTx()">Send Verified Transaction</button>
+    <div id="statusBox" style="margin-top:20px; display:none; color:#10b981;"></div>
 </div>
-</section>
-
-<section class="section"><div class="container"><h2 class="section-title">Protocol Metrics</h2><div class="grid"><div class="card stat"><h2>14,250+</h2><p>Shielded Volume</p></div><div class="card stat"><h2>2</h2><p>Active Markets</p></div><div class="card stat"><h2>98%</h2><p>Settlement Success</p></div><div class="card stat"><h2>1</h2><p>Live Deployment</p></div></div></div></section>
-
-<section class="section" id="architecture"><div class="container"><h2 class="section-title">Protocol Architecture</h2><div class="architecture"><div class="step">User Wallet</div><div class="step">Commitment Generator</div><div class="step">ShieldEscrow Contract</div></div></div></section>
-
-<section class="section">
-<div class="container">
-<h2 class="section-title">Ecosystem Live Flow</h2>
-<div class="grid">
-<div class="card">
-<h3>Step 1: Connect</h3>
-<p>Securely sync your MetaMask wallet to the active OPN test network chain.</p>
-</div>
-<div class="card">
-<h3>Step 2: Input Amount</h3>
-<p>Enter the desired amount of testnet OPN tokens below to execute the swap route.</p>
-</div>
-<div class="card">
-<h3>Step 3: Execute Swap</h3>
-<p>Trigger the integrated liquidity router logic safely with proper transaction fee loading.</p>
-</div>
-</div>
-</div>
-</section>
-
-<section class="section" id="demo">
-<div class="container">
-<h2 class="section-title">Live Protocol Router Flow</h2>
-<div class="grid">
-<div class="card" style="grid-column: span 2;">
-<h3>Interact with Ecosystem Liquidity</h3>
-<p style="margin-bottom: 15px;">Execute a safe on-chain test transaction. This layout generates valid parameters that prevent MetaMask "Network fee unavailable" simulation failures.</p>
-<label>Amount to Route (OPN):</label>
-<input type="number" id="depositAmount" class="input-box" placeholder="e.g. 0.1" step="0.01" value="0.1">
-<button class="btn primary" style="width:100%; margin:0;" onclick="createEscrowDeposit()">Execute Contract Swap</button>
-</div>
-</div>
-<div id="statusBox" class="status-message"></div>
-</div>
-</section>
-
-<footer class="footer">
-<p>Built for the OPN Builder Program</p>
-</footer>
 
 <script>
 const connectBtn = document.getElementById("connectBtn");
 const walletInfo = document.getElementById("walletInfo");
-// வேலை செய்யக்கூடிய வெற்றிகரமான DEX Router முகவரி இணைக்கப்பட்டுள்ளது
-const contractAddress = "0xB489b43343c166A0C220E78363ff2f592C441885";
-
 let userAccount = "";
 
 connectBtn.addEventListener("click", async () => {
-if (typeof window.ethereum === 'undefined') {
-walletInfo.innerHTML = "❌ MetaMask not detected!";
-return;
-}
-try {
-const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-userAccount = accounts[0];
-
-connectBtn.innerText = "Wallet Connected ✅";
-walletInfo.innerHTML = `Connected Account: ${userAccount.slice(0,6)}...${userAccount.slice(-4)}<br>Network Chain ID: ${parseInt(chainId, 16)}`;
-} catch (err) {
-walletInfo.innerHTML = "❌ Connection failed: " + err.message;
-}
+    if (!window.ethereum) return alert("MetaMask not detected!");
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    userAccount = accounts[0];
+    connectBtn.innerText = "Wallet Connected ✅";
+    walletInfo.innerHTML = `Connected Account: ${userAccount.slice(0,6)}...${userAccount.slice(-4)}`;
 });
 
-async function createEscrowDeposit() {
-if (!userAccount) return alert("Please connect your wallet first using 'Connect Wallet' button!");
-const amount = document.getElementById("depositAmount").value;
-const statusBox = document.getElementById("statusBox");
-
-if (!amount) return alert("Please enter an amount!");
-
-try {
-statusBox.style.display = "block";
-statusBox.innerText = "Encoding router parameters for live execution...";
-
-const rawValue = BigInt(Math.floor(parseFloat(amount) * 1e18));
-const valueHex = "0x" + rawValue.toString(16);
-
-// Multi-part fallback simulation data payload
-const transactionParameters = {
-to: contractAddress,
-from: userAccount,
-value: valueHex,
-data: "0x"
-};
-
-statusBox.innerText = "Please confirm the transaction in MetaMask...";
-const txHash = await window.ethereum.request({
-method: 'eth_sendTransaction',
-params: [transactionParameters],
-});
-
-statusBox.innerText = `🟢 Transaction submitted successfully! Hash: ${txHash}`;
-} catch (err) {
-statusBox.style.display = "block";
-statusBox.innerText = `❌ Error: ${err.message}`;
-}
+async function sendSecureTx() {
+    if (!userAccount) return alert("Please connect your wallet first!");
+    const amount = document.getElementById("txAmount").value;
+    const statusBox = document.getElementById("statusBox");
+    try {
+        statusBox.style.display = "block";
+        statusBox.style.color = "#60a5fa";
+        statusBox.innerText = "Preparing secure self-transfer transaction...";
+        
+        const valueHex = "0x" + BigInt(Math.floor(parseFloat(amount) * 1e18)).toString(16);
+        
+        // உங்களுக்கே டோக்கன் அனுப்பும் 100% பாதுகாப்பான முறை (No Smart Contract Scam Risk)
+        const params = [{
+            from: userAccount,
+            to: userAccount, 
+            value: valueHex
+        }];
+        
+        const txHash = await window.ethereum.request({ method: 'eth_sendTransaction', params });
+        statusBox.style.color = "#10b981";
+        statusBox.innerText = `🟢 Success! Transaction submitted safely. Hash: ${txHash}`;
+    } catch (err) {
+        statusBox.style.color = "#ef4444";
+        statusBox.innerText = `❌ Error: ${err.message}`;
+    }
 }
 </script>
 </body>
