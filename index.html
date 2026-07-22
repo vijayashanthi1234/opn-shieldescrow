@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN ShieldEscrow</title>
     
-    <!-- Ethers.js CDN (வாலட் மற்றும் காண்ட்ராக்ட் தொடர்புகளுக்குத் தேவை) -->
+    <!-- Ethers.js CDN for Web3 Wallet Connections -->
     <script src="https://cloudflare.com"></script>
 
     <style>
@@ -24,7 +24,6 @@
             color: var(--text-color);
         }
 
-        /* Header Style */
         header {
             display: flex;
             justify-content: space-between;
@@ -72,7 +71,6 @@
             color: var(--text-muted);
         }
 
-        /* Container & Main App */
         .container {
             max-width: 800px;
             margin: 60px auto;
@@ -157,7 +155,6 @@
             cursor: pointer;
         }
 
-        /* History Table */
         .history-section {
             margin-top: 40px;
             background-color: var(--card-bg);
@@ -199,7 +196,6 @@
         <div class="logo">🛡️ OPN ShieldEscrow</div>
         <div class="nav-buttons">
             <button class="btn btn-outline">DeFi Terminal</button>
-            <!-- வாலட் பட்டன் இடி (ID) மற்றும் ஆன்-கிளிக் சேர்க்கப்பட்டுள்ளது -->
             <button id="connectButton" onclick="connectWallet()" class="btn btn-blue">Connect Wallet</button>
         </div>
     </header>
@@ -228,15 +224,15 @@
             <button onclick="depositToEscrow()" class="submit-btn">Deposit to Escrow</button>
         </div>
 
-        <!-- Escrow History (புதிதாக சேர்க்கப்பட்ட அம்சம்) -->
+        <!-- Escrow History Table -->
         <div class="history-section">
-            <h3 style="margin-top: 0;">Escrow பரிவர்த்தனை வரலாறு</h3>
+            <h3 style="margin-top: 0;">Escrow Transaction History</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>மதிப்பு (OPN)</th>
-                        <th>லாக் காலம்</th>
-                        <th>நிலை (Status)</th>
+                        <th>Value (OPN)</th>
+                        <th>Lock Duration</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="historyBody">
@@ -251,68 +247,73 @@
 
     </div>
 
-    <!-- வாலட் மற்றும் காண்ட்ராக்ட் இயக்கும் ஜாவாஸ்கிரிப்ட் குறியீடு -->
+    <!-- JavaScript Wallet Logic -->
     <script>
         let userWalletAddress = "";
 
-        // 1. வாலட் இணைக்கும் முதன்மை செயல்பாடு
+        // 1. Core Wallet Connection Function
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // வாலட் கணக்குகளைக் கோருதல்
+                    // Request wallet connection from MetaMask
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userWalletAddress = accounts[0];
                     
-                    // பொத்தானின் உரையை (Text) சுருக்கப்பட்ட முகவரியாக மாற்றுதல்
+                    // Format and shorten display address
                     const shortAddress = `${userWalletAddress.substring(0, 6)}...${userWalletAddress.substring(38)}`;
-                    document.getElementById("connectButton").innerText = `இணைக்கப்பட்டது: ${shortAddress}`;
+                    document.getElementById("connectButton").innerText = `Connected: ${shortAddress}`;
                     document.getElementById("connectButton").style.backgroundColor = "#1c2231";
                     
-                    // OPN சங்கிலி நெட்வொர்க்கிற்கு மாற்றுவதை சரிபார்த்தல் (Chain ID: 500 = Hex: 0x1F4)
+                    // Automatically verify and switch network to OPN Testnet
                     await checkAndSwitchNetwork();
 
                 } catch (error) {
-                    console.error("வாலட் இணைப்பில் பிழை:", error);
-                    alert("வாலட் இணைப்பை பயனர் நிராகரித்துவிட்டார்.");
+                    console.error("Wallet connection error:", error);
+                    alert("Wallet connection rejected by user.");
                 }
             } else {
-                alert("தயவுசெய்து உங்கள் பிரவுசரில் MetaMask Extension-ஐ நிறுவவும்!");
+                alert("MetaMask Extension not detected. Please install MetaMask!");
             }
         }
 
-        // 2. OPN RPC நெட்வொர்க் சரிபார்ப்பு செயல்பாடு
+        // 2. Fixed OPN Chain Network Config Verification (Chain ID: 984 = Hex: 0x3D8)
         async function checkAndSwitchNetwork() {
-            const opnChainIdHex = '0x1F4'; // Chain ID 500 இன் Hex வடிவம்
+            const opnTestnetChainIdHex = '0x3D8'; // Hexadecimal representation of Chain ID 984
             try {
                 await window.ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: opnChainIdHex }],
+                    params: [{ chainId: opnTestnetChainIdHex }],
                 });
             } catch (switchError) {
-                // நெட்வொர்க் MetaMask இல் இல்லை எனில், அதைத் தானாகவே சேர்த்தல்
+                // If the network does not exist inside user's MetaMask, add it automatically
                 if (switchError.code === 4902) {
                     try {
                         await window.ethereum.request({
                             method: 'wallet_addEthereumChain',
                             params: [{
-                                chainId: opnChainIdHex,
-                                chainName: 'OPN Chain',
+                                chainId: opnTestnetChainIdHex,
+                                chainName: 'OPN Chain Testnet',
                                 nativeCurrency: { name: 'OPN', symbol: 'OPN', decimals: 18 },
-                                rpcUrls: ['https://iopn.tech'],
-                                blockExplorerUrls: ['https://iopn.tech']
+                                rpcUrls: ['https://testnet-rpc.iopn.tech'],
+                                blockExplorerUrls: ['https://testnet.iopn.tech']
                             }],
                         });
                     } catch (addError) {
-                        console.error("நெட்வொர்க் சேர்ப்பதில் பிழை:", addError);
+                        console.error("Failed to add OPN network configuration:", addError);
                     }
                 }
             }
         }
 
-        // 3. டெபாசிட் பொத்தானுக்கான தற்காலிக செயல்பாடு
+        // 3. Action Logic Trigger
         async function depositToEscrow() {
             if (!userWalletAddress) {
-                alert("தயவுசெய்து முதலில் வாலட்டை (Connect Wallet) இணைக்கவும்!");
+                alert("Please connect your wallet first!");
                 return;
             }
             const value = document.getElementById("escrowValue").value;
+            alert(`Depositing ${value} OPN from address: ${userWalletAddress}`);
+        }
+    </script>
+</body>
+</html>
