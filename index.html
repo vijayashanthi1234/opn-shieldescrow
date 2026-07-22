@@ -1,455 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OPN ShieldEscrow & DeFi Terminal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPN ShieldEscrow</title>
+    
+    <!-- Ethers.js CDN (வாலட் மற்றும் காண்ட்ராக்ட் தொடர்புகளுக்குத் தேவை) -->
+    <script src="https://cloudflare.com"></script>
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Inter,Segoe UI,sans-serif;
-scroll-behavior:smooth;
-}
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #131823;
+            --primary-blue: #0052ff;
+            --text-color: #ffffff;
+            --text-muted: #8a99ad;
+        }
 
-body{
-background:#040815;
-color:#fff;
-line-height:1.6;
-overflow-x:hidden;
-}
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
 
-body::before{
-content:'';
-position:fixed;
-width:700px;
-height:700px;
-background:radial-gradient(circle,#2563eb33,transparent 70%);
-top:-250px;
-left:-250px;
-z-index:-1;
-}
+        /* Header Style */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: rgba(11, 14, 20, 0.8);
+            border-bottom: 1px solid #1c2231;
+        }
 
-body::after{
-content:'';
-position:fixed;
-width:700px;
-height:700px;
-background:radial-gradient(circle,#7c3aed33,transparent 70%);
-bottom:-250px;
-right:-250px;
-z-index:-1;
-}
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.container{
-width:90%;
-max-width:1200px;
-margin:auto;
-}
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
 
-nav{
-position:fixed;
-top:0;
-width:100%;
-padding:15px 0;
-background:rgba(4,8,21,.85);
-backdrop-filter:blur(12px);
-z-index:999;
-border-bottom:1px solid rgba(255,255,255,.06);
-}
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-.nav-content{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+        .btn-blue {
+            background-color: var(--primary-blue);
+            color: white;
+        }
 
-.logo{
-font-weight:800;
-font-size:1.25rem;
-color:#60a5fa;
-letter-spacing: 0.5px;
-}
+        .btn-blue:hover {
+            background-color: #0042cc;
+        }
 
-.nav-links a{
-margin-left:12px;
-}
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #2c354a;
+            color: var(--text-muted);
+        }
 
-.hero{
-min-height:90vh;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-padding-top:90px;
-}
+        /* Container & Main App */
+        .container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
 
-.hero h1{
-font-size:4rem;
-margin-bottom:20px;
-background:linear-gradient(90deg,#60a5fa,#a855f7);
--webkit-background-clip:text;
-color:transparent;
-font-weight: 800;
-}
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
 
-.hero p{
-max-width:800px;
-margin:auto;
-color:#cbd5e1;
-font-size:1.15rem;
-}
+        .tab-btn {
+            background-color: #1c2231;
+            color: var(--text-muted);
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
 
-.badge{
-display:inline-block;
-padding:8px 18px;
-background:#1e293b;
-border:1px solid #334155;
-border-radius:30px;
-margin-bottom:25px;
-font-size: 14px;
-color: #38bdf8;
-font-weight: 600;
-}
+        .tab-btn.active {
+            background-color: var(--primary-blue);
+            color: white;
+        }
 
-.buttons{
-margin-top:35px;
-}
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            border: 1px solid #1c2231;
+        }
 
-.btn{
-padding:14px 28px;
-text-decoration:none;
-border-radius:12px;
-margin:8px;
-display:inline-block;
-transition:.3s;
-cursor:pointer;
-border:none;
-font-size:15px;
-font-weight: 600;
-}
+        h2 {
+            margin-top: 0;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
 
-.primary{
-background:#2563eb;
-color:#fff;
-box-shadow: 0 4px 14px rgba(37,99,235,0.4);
-}
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
 
-.primary:hover {
-background:#1d4ed8;
-box-shadow: 0 6px 20px rgba(37,99,235,0.6);
-}
+        .input-group {
+            text-align: left;
+            margin-bottom: 25px;
+        }
 
-.secondary{
-background:#111827;
-border:1px solid #334155;
-color:#fff;
-}
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
 
-.secondary:hover {
-background: #1f2937;
-border-color: #4b5563;
-}
+        input {
+            width: 100%;
+            padding: 15px;
+            background-color: #0b0e14;
+            border: 1px solid #2c354a;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
 
-.btn:hover{
-transform:translateY(-3px);
-}
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-#walletInfo{
-margin-top:20px;
-color:#60a5fa;
-font-size:14px;
-font-family: monospace;
-background: rgba(96,165,250,0.1);
-display: inline-block;
-padding: 6px 14px;
-border-radius: 8px;
-border: 1px solid rgba(96,165,250,0.2);
-}
+        /* History Table */
+        .history-section {
+            margin-top: 40px;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #1c2231;
+        }
 
-.section{
-padding:80px 0;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 15px;
+        }
 
-.section-title{
-text-align:center;
-font-size:2.5rem;
-margin-bottom:40px;
-font-weight: 700;
-}
+        th {
+            color: var(--text-muted);
+            padding: 12px;
+            border-bottom: 1px solid #2c354a;
+            font-size: 14px;
+        }
 
-.tabs-nav {
-display: flex;
-justify-content: center;
-gap: 15px;
-margin-bottom: 40px;
-}
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #1c2231;
+            font-size: 15px;
+        }
 
-.tab-btn {
-padding: 12px 24px;
-background: #111827;
-border: 1px solid #334155;
-color: #94a3b8;
-border-radius: 10px;
-cursor: pointer;
-font-weight: 600;
-font-size: 15px;
-transition: 0.3s;
-}
-
-.tab-btn.active {
-background: #2563eb;
-color: white;
-border-color: #2563eb;
-box-shadow: 0 4px 14px rgba(37,99,235,0.3);
-}
-
-.defi-panel {
-display: none;
-background: rgba(30, 41, 59, 0.3);
-border: 1px solid rgba(96, 165, 250, 0.15);
-border-radius: 24px;
-padding: 35px;
-backdrop-filter: blur(10px);
-}
-
-.defi-panel.active {
-display: block;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:25px;
-}
-
-.card{
-background:rgba(255,255,255,.02);
-border:1px solid rgba(255,255,255,.05);
-border-radius:20px;
-padding:25px;
-transition:.3s;
-}
-
-.card h3{
-color:#60a5fa;
-margin-bottom:12px;
-font-size: 1.25rem;
-}
-
-.stat{
-text-align:center;
-}
-
-.stat h2{
-color:#60a5fa;
-font-size:2.5rem;
-font-weight: 800;
-margin-bottom: 5px;
-}
-
-.architecture{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:15px;
-}
-
-.step{
-padding:20px;
-background:#111827;
-border:1px solid #334155;
-border-radius:15px;
-min-width:180px;
-text-align:center;
-font-weight: 500;
-}
-
-.roadmap-item{
-border-left:3px solid #2563eb;
-padding-left:20px;
-margin-bottom:30px;
-}
-
-.input-box {
-width: 100%;
-padding: 14px;
-background: #0b0f19;
-border: 1px solid #334155;
-border-radius: 10px;
-color: #fff;
-margin-top: 10px;
-margin-bottom: 20px;
-font-size: 16px;
-outline: none;
-text-align: center;
-font-weight: 600;
-}
-
-.select-box {
-width: 100%;
-padding: 14px;
-background: #0b0f19;
-border: 1px solid #334155;
-border-radius: 10px;
-color: #fff;
-margin-bottom: 20px;
-font-size: 15px;
-font-weight: 600;
-text-align: center;
-outline: none;
-cursor: pointer;
-}
-
-.status-message {
-margin-top: 20px;
-padding: 15px;
-border-radius: 10px;
-background: rgba(255,255,255,0.02);
-font-size: 15px;
-display: none;
-word-break: break-all;
-font-weight: 500;
-border-left: 4px solid #60a5fa;
-text-align: center;
-}
-
-.footer{
-text-align:center;
-padding:50px 20px;
-color:#94a3b8;
-border-top:1px solid rgba(4,8,21,.85);
-font-size: 14px;
-}
-</style>
+        .status-badge {
+            color: #00ff88;
+            font-weight: 500;
+        }
+    </style>
 </head>
-
 <body>
 
-<nav>
-<div class="container nav-content">
-<div class="logo">🛡️ OPN ShieldEscrow</div>
-<div class="nav-links">
-<a href="#terminal" class="btn secondary">DeFi Terminal</a>
-<a href="https://github.com" class="btn primary" style="padding:10px 20px;">GitHub</a>
-</div>
-</div>
-</nav>
-
-<section class="hero">
-<div class="container">
-<div class="badge">OPN Builder Program 2026</div>
-<h1>OPN ShieldEscrow & DeFi Terminal</h1>
-<p>
-Privacy-Preserving Settlement Infrastructure unified with advanced decentralized financial utilities.
-Lock collateral into escrow, swap assets natively, bridge tokens cross-chain, and stake rewards directly inside OPN Chain.
-</p>
-<div class="buttons">
-<button id="connectBtn" class="btn primary">Connect Wallet</button>
-</div>
-<div>
-<div id="walletInfo">Wallet Not Connected</div>
-</div>
-</div>
-</section>
-
-<section class="section">
-<div class="container">
-<h2 class="section-title">Protocol Metrics</h2>
-<div class="grid">
-<div class="card stat">
-<h2>14,250+</h2>
-<p>Shielded Volume</p>
-</div>
-<div class="card stat">
-<h2>2</h2>
-<p>Active Markets</p>
-</div>
-<div class="card stat">
-<h2>98%</h2>
-<p>Settlement Success</p>
-</div>
-<div class="card stat">
-<h2>1</h2>
-<p>Live Deployment</p>
-</div>
-</div>
-</div>
-</section>
-
-<section class="section" id="architecture">
-<div class="container">
-<h2 class="section-title">Protocol Architecture</h2>
-<div class="architecture">
-<div class="step">User Wallet API</div>
-<div class="step">Commitment Module</div>
-<div class="step">ShieldEscrow Gateway</div>
-<div class="step">Ecosystem Validation</div>
-</div>
-</div>
-</section>
-
-<!-- Unified DeFi Utility Terminal Section -->
-<section class="section" id="terminal">
-<div class="container" style="max-width: 750px;">
-    <h2 class="section-title">Decentralized Asset Terminal</h2>
-    
-    <!-- Tab Controls Buttons -->
-    <div class="tabs-nav">
-        <button class="tab-btn active" onclick="switchDeFiTab(event, 'escrow-tab')">🛡️ Escrow</button>
-        <button class="tab-btn" onclick="switchDeFiTab(event, 'swap-tab')">🔄 Swap</button>
-        <button class="tab-btn" onclick="switchDeFiTab(event, 'bridge-tab')">🌉 Bridge</button>
-        <button class="tab-btn" onclick="switchDeFiTab(event, 'stake-tab')">🥩 Stake</button>
-    </div>
-
-    <!-- 1. ESCROW PANEL -->
-    <div id="escrow-tab" class="defi-panel active">
-        <h3 style="text-align:center; margin-bottom:10px;">Commit-Reveal Escrow Vault</h3>
-        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Lock collateral using commitment-based parameters safely into ShieldEscrow.</p>
-        
-        <label style="font-weight:600; color:#60a5fa;">Escrow Value (OPN):</label>
-        <input type="number" id="escrowAmount" class="input-box" value="0.1" step="0.01">
-        
-        <button class="btn primary" style="width:100%; margin:0; padding:16px;" onclick="executeDeFiTx('escrowAmount', 'Locking collateral into ShieldEscrow system...')">Deposit to Escrow</button>
-    </div>
-
-    <!-- 2. SWAP PANEL -->
-    <div id="swap-tab" class="defi-panel">
-        <h3 style="text-align:center; margin-bottom:10px;">Native Token Liquidity Swap</h3>
-        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Swap OPN instantly for alternative ecosystem layer asset configurations.</p>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-            <div>
-                <label style="font-weight:600; color:#60a5fa;">From:</label>
-                <select class="select-box"><option>OPN (Native)</option></select>
-            </div>
-            <div>
-                <label style="font-weight:600; color:#aa80ff;">To:</label>
-                <select class="select-box"><option>OPNT (Ecosystem)</option></select>
-            </div>
+    <!-- Header Navigation -->
+    <header>
+        <div class="logo">🛡️ OPN ShieldEscrow</div>
+        <div class="nav-buttons">
+            <button class="btn btn-outline">DeFi Terminal</button>
+            <!-- வாலட் பட்டன் இடி (ID) மற்றும் ஆன்-கிளிக் சேர்க்கப்பட்டுள்ளது -->
+            <button id="connectButton" onclick="connectWallet()" class="btn btn-blue">Connect Wallet</button>
         </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
         
-        <label style="font-weight:600; color:#60a5fa;">Swap Amount:</label>
-        <input type="number" id="swapAmount" class="input-box" value="0.5" step="0.1">
-        
-        <button class="btn primary" style="width:100%; margin:0; padding:16px;" onclick="executeDeFiTx('swapAmount', 'Encoding decentralized router routing keys for Swap...')">Execute Token Swap</button>
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active">Escrow</button>
+            <button class="tab-btn">Swap</button>
+            <button class="tab-btn">Bridge</button>
+            <button class="tab-btn">Stake</button>
+        </div>
+
+        <!-- Main Escrow Vault Card -->
+        <div class="card">
+            <h2>Commit-Reveal Escrow Vault</h2>
+            <div class="subtitle">Lock collateral using commitment-based parameters safely into ShieldEscrow.</div>
+            
+            <div class="input-group">
+                <label for="escrowValue">Escrow Value (OPN):</label>
+                <input type="number" id="escrowValue" value="0.1" step="0.01" min="0">
+            </div>
+
+            <button onclick="depositToEscrow()" class="submit-btn">Deposit to Escrow</button>
+        </div>
+
+        <!-- Escrow History (புதிதாக சேர்க்கப்பட்ட அம்சம்) -->
+        <div class="history-section">
+            <h3 style="margin-top: 0;">Escrow பரிவர்த்தனை வரலாறு</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>மதிப்பு (OPN)</th>
+                        <th>லாக் காலம்</th>
+                        <th>நிலை (Status)</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td>0.1 OPN</td>
+                        <td>24 Hours</td>
+                        <td><span class="status-badge">Locked</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
-    <!-- 3. BRIDGE PANEL -->
-    <div id="bridge-tab" class="defi-panel">
-        <h3 style="text-align:center; margin-bottom:10px;">Cross-Chain Bridge Gateway</h3>
-        <p style="text-align:center; color:#94a3b8; font-size:14px; margin-bottom:25px;">Transfer assets cross-chain safely using verified multi-chain state relays.</p>
-        
-        <label style="font-weight:600; color:#60a5fa;">Target Destination Chain:</label>
-        <select class="select-box">
-            <option>OPN Mainnet (EVM)</option>
-            <option>Ethereum Testnet (Sepolia)</option>
-            <option>Arbitrum Layer 2 Network</option>
-        </select>
-        
-        <label style="font-weight:600; color:#60a5fa;">Bridge Target Amount (OPN):</label>
-        <input type="number" id="bridgeAmount" class="input-box" value="1.0" step="0.5">
-        
-Initiate Asset BridgeEcosystem Yield StakingStake OPN node assets to earn up to 12.5% APY network rewards continuously.12.5%Estimated APY0.00 OPNYour Total StakedStake Capital (OPN):Confirm Stake Capital© 2026 OPN ShieldEscrow Protocol Framework Hub. Built for OPN Builder Program.const connectBtn = document.getElementById("connectBtn");const walletInfo = document.getElementById("walletInfo");let userAccount = "";function switchDeFiTab(evt, tabId) {const panels = document.getElementsByClassName("defi-panel");for (let i = 0; i < panels.length; i++) {panels[i].className = panels[i].className.replace(" active", "");}const tabBtns = document.getElementsByClassName("tab-btn");for (let i = 0; i < tabBtns.length; i++) {tabBtns[i].className = tabBtns[i].className.replace(" active", "");}document.getElementById(tabId).className += " active";evt.currentTarget.className += " active";document.getElementById("statusBox").style.display = "none";}connectBtn.addEventListener("click", async () => {if (typeof window.ethereum === 'undefined') {walletInfo.innerHTML = "❌ MetaMask not detected!";return;}try {const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });const chainId = await window.ethereum.request({ method: 'eth_chainId' });userAccount = accounts[0]; // 100% Fixed syntax array node pointconnectBtn.innerText = "Wallet Connected ✅";walletInfo.innerHTML = Connected: ${userAccount.slice(0,6)}...${userAccount.slice(-4)} | Chain ID: ${parseInt(chainId, 16)};} catch (err) {walletInfo.innerHTML = "❌ Connection failed: " + err.message;}});async function executeDeFiTx(inputId, activeDescription) {if (!userAccount) return alert("Please establish wallet core architecture parameters first!");const amount = document.getElementById(inputId).value;const statusBox = document.getElementById("statusBox");if (!amount || parseFloat(amount) <= 0) return alert("Please enter a valid asset token value!");try {statusBox.style.display = "block";statusBox.style.borderColor = "#2563eb";statusBox.style.color = "#60a5fa";statusBox.innerText = activeDescription;const valueHex = "0x" + BigInt(Math.floor(parseFloat(amount) * 1e18)).toString(16);const params = [{from: userAccount,to: userAccount,value: valueHex}];statusBox.innerText = "Awaiting transaction signature parameters configuration inside MetaMask...";const txHash = await window.ethereum.request({ method: 'eth_sendTransaction', params });statusBox.style.borderColor = "#10b981";statusBox.style.color = "#10b981";statusBox.innerText = 🟢 Transaction broadcasted successfully! On-chain Log Hash: ${txHash};} catch (err) {statusBox.style.borderColor = "#ef4444";statusBox.style.color = "#ef4444";statusBox.innerText = ❌ Terminal Session Error: ${err.message};}}
+    <!-- வாலட் மற்றும் காண்ட்ராக்ட் இயக்கும் ஜாவாஸ்கிரிப்ட் குறியீடு -->
+    <script>
+        let userWalletAddress = "";
+
+        // 1. வாலட் இணைக்கும் முதன்மை செயல்பாடு
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // வாலட் கணக்குகளைக் கோருதல்
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userWalletAddress = accounts[0];
+                    
+                    // பொத்தானின் உரையை (Text) சுருக்கப்பட்ட முகவரியாக மாற்றுதல்
+                    const shortAddress = `${userWalletAddress.substring(0, 6)}...${userWalletAddress.substring(38)}`;
+                    document.getElementById("connectButton").innerText = `இணைக்கப்பட்டது: ${shortAddress}`;
+                    document.getElementById("connectButton").style.backgroundColor = "#1c2231";
+                    
+                    // OPN சங்கிலி நெட்வொர்க்கிற்கு மாற்றுவதை சரிபார்த்தல் (Chain ID: 500 = Hex: 0x1F4)
+                    await checkAndSwitchNetwork();
+
+                } catch (error) {
+                    console.error("வாலட் இணைப்பில் பிழை:", error);
+                    alert("வாலட் இணைப்பை பயனர் நிராகரித்துவிட்டார்.");
+                }
+            } else {
+                alert("தயவுசெய்து உங்கள் பிரவுசரில் MetaMask Extension-ஐ நிறுவவும்!");
+            }
+        }
+
+        // 2. OPN RPC நெட்வொர்க் சரிபார்ப்பு செயல்பாடு
+        async function checkAndSwitchNetwork() {
+            const opnChainIdHex = '0x1F4'; // Chain ID 500 இன் Hex வடிவம்
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: opnChainIdHex }],
+                });
+            } catch (switchError) {
+                // நெட்வொர்க் MetaMask இல் இல்லை எனில், அதைத் தானாகவே சேர்த்தல்
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: opnChainIdHex,
+                                chainName: 'OPN Chain',
+                                nativeCurrency: { name: 'OPN', symbol: 'OPN', decimals: 18 },
+                                rpcUrls: ['https://iopn.tech'],
+                                blockExplorerUrls: ['https://iopn.tech']
+                            }],
+                        });
+                    } catch (addError) {
+                        console.error("நெட்வொர்க் சேர்ப்பதில் பிழை:", addError);
+                    }
+                }
+            }
+        }
+
+        // 3. டெபாசிட் பொத்தானுக்கான தற்காலிக செயல்பாடு
+        async function depositToEscrow() {
+            if (!userWalletAddress) {
+                alert("தயவுசெய்து முதலில் வாலட்டை (Connect Wallet) இணைக்கவும்!");
+                return;
+            }
+            const value = document.getElementById("escrowValue").value;
