@@ -249,25 +249,7 @@
     </div>
 
     <!-- JavaScript Wallet Logic -->
-    <script>
-        let userWalletAddress = "";
-        let provider;
-        let signer;
-
-        // 1. Core Wallet Connection Function
-        async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    userWalletAddress = accounts[0];
-                    
-                    const shortAddress = `${userWalletAddress.substring(0, 6)}...${userWalletAddress.substring(38)}`;
-                    document.getElementById("connectButton").innerText = `Connected: ${shortAddress}`;
-                    document.getElementById("connectButton").style.backgroundColor = "#1c2231";
-                    
-                    // Setup ethers provider and signer
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
+    <script>let userWalletAddress = "";let provider;let signer;async function connectWallet() {if (typeof window.ethereum !== 'undefined') {try {const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });userWalletAddress = accounts[0];const shortAddress = userWalletAddress.substring(0, 6) + "..." + userWalletAddress.substring(38);document.getElementById("connectButton").innerText = "Connected: " + shortAddress;document.getElementById("connectButton").style.backgroundColor = "#1c2231";provider = new ethers.providers.Web3Provider(window.ethereum);signer = provider.getSigner();
 
                     await checkAndSwitchNetwork();
 
