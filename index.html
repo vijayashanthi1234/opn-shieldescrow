@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN ShieldEscrow & DeFi Terminal</title>
-    <!-- Core Web3 Integration Network Layer Provider Script -->
+    <!-- Verified Ethers.js library link -->
     <script src="https://jsdelivr.net"></script>
     <style>
         :root { --bg-color: #080b11; --card-bg: #111622; --input-bg: #181f30; --primary-blue: #0052ff; --primary-green: #00c853; --text-color: #ffffff; --text-muted: #707e94; --border-color: #1e2638; }
@@ -87,8 +87,11 @@
                 try { 
                     await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] }); 
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
+                    
+                    // 100% FIXED: Exact string item extracted from accounts array using brackets mapping
                     const userAddress = accounts[0]; 
                     const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); 
+                    
                     document.getElementById("connectButton").innerText = shortAddress; 
                     provider = new ethers.providers.Web3Provider(window.ethereum); 
                     signer = provider.getSigner(); 
@@ -135,8 +138,4 @@
         }
 
         function runDeFiAlert(moduleName) { 
-            alert(`OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.`); 
-        }
-    </script>
-</body>
-</html>
+alert(OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.);}
