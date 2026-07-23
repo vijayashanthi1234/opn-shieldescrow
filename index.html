@@ -80,7 +80,6 @@
             padding: 0 20px;
         }
 
-        /* ArenaX Premium Tab Navigation Style */
         .tabs {
             display: flex;
             background-color: var(--card-bg);
@@ -214,7 +213,7 @@
 
     <div class="container">
         
-        <!-- ArenaX Style Smooth Content Controller Tabs -->
+        <!-- Tab Controllers -->
         <div class="tabs">
             <button id="tab-escrow" class="tab-btn active" onclick="switchTab('escrow')">Escrow</button>
             <button id="tab-swap" class="tab-btn" onclick="switchTab('swap')">Swap</button>
@@ -224,13 +223,13 @@
 
         <div class="card">
             
-            <!-- PANEL 1: ESCROW INTERFACE (100% FUNCTIONAL) -->
+            <!-- PANEL 1: ESCROW INTERFACE -->
             <div id="panel-escrow" class="panel-content active">
                 <h2>Commit-Reveal Escrow Vault</h2>
                 <div class="subtitle">Lock testnet collateral via cryptographic commitments securely into ShieldEscrow system.</div>
                 
                 <div class="input-group">
-                    <label>Secret Word (ரகசிய வார்த்தை):</label>
+                    <label>Secret Word:</label>
                     <input type="text" id="secretInput" placeholder="Enter custom phrase string">
                 </div>
                 <div class="input-group">
@@ -240,7 +239,7 @@
                 <button onclick="depositToEscrow()" class="submit-btn" style="margin-bottom: 25px;">Deposit 0.1 OPN to Escrow</button>
 
                 <h2 style="border-top: 1px solid var(--border-color); padding-top: 20px;">🔓 Claim Escrow Payout</h2>
-                <div class="subtitle">Provide your original unhashed secret phrase to unlock and release the locked OPN back to your signer address.</div>
+                <div class="subtitle">Provide your original unhashed secret phrase to unlock and release the locked OPN back to your wallet.</div>
                 <div class="input-group">
                     <label>Original Secret Word:</label>
                     <input type="text" id="claimSecretInput" placeholder="Enter original password to reveal">
@@ -248,10 +247,10 @@
                 <button onclick="claimEscrow()" class="submit-btn submit-btn-green">Reveal & Claim Payout</button>
             </div>
 
-            <!-- PANEL 2: DEX SWAP INTERFACE (PREMIUM UI PLACEHOLDER) -->
+            <!-- PANEL 2: DEX SWAP PLACEHOLDER -->
             <div id="panel-swap" class="panel-content">
                 <h2>OPN Automated Swap</h2>
-                <div class="subtitle">Instant exchange infrastructure for testnet ecosystem standard tokens.</div>
+                <div class="subtitle">Instant exchange infrastructure for testnet ecosystem tokens.</div>
                 <div class="input-group">
                     <label>Pay:</label>
                     <input type="number" value="10" placeholder="0.0">
@@ -265,7 +264,7 @@
                 <button onclick="runDeFiAlert('Swap Execution')" class="submit-btn">Execute Token Swap</button>
             </div>
 
-            <!-- PANEL 3: BRIDGE INTERFACE (PREMIUM UI PLACEHOLDER) -->
+            <!-- PANEL 3: BRIDGE PLACEHOLDER -->
             <div id="panel-bridge" class="panel-content">
                 <h2>Sovereign Interchain Bridge</h2>
                 <div class="subtitle">Relay collateral natively between OPN Chain Testnet and external EVM environments.</div>
@@ -284,8 +283,13 @@
                 <button onclick="runDeFiAlert('Bridge Transfer')" class="submit-btn">Initiate Cross-Chain Bridge</button>
             </div>
 
-            <!-- PANEL 4: STAKING INTERFACE (PREMIUM UI PLACEHOLDER) -->
+            <!-- PANEL 4: STAKING PLACEHOLDER -->
             <div id="panel-stake" class="panel-content">
                 <h2>Ecosystem Liquidity Staking</h2>
-                <div class="subtitle">Lock native $OPN tokens to accumulate smart reputation scoring values and validate network activities.</div>
-Staking Pool Matrix:Core Validator Pool (Estimated 14% APR)Staking Amount (OPN):Stake AssetsSystem Idle. Please connect wallet context.const OPN_CHAIN_ID = '0x3D8'; // Chain ID: 984 (Hex: 0x3D8)const CONTRACT_ADDRESS = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";const CONTRACT_ABI = ["function depositToEscrow(bytes32 _commitment, uint256 _duration) external payable","function claimEscrow(string calldata _secret) external","function getVaultDetails(bytes32 _commitment) external view returns (uint256 value, uint256 lockDuration, bool isLocked, bool isClaimed)"];let provider, signer, contract;// ArenaX-style Dynamic UI Content Tab Switcher Control Matrixfunction switchTab(tabName) {document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active'));document.getElementById(tab-${tabName}).classList.add('active');document.getElementById(panel-${tabName}).classList.add('active');}// Web3 Automated Provider Connector Array Strategyasync function connectWallet() {if (typeof window.ethereum !== 'undefined') {try {document.getElementById("statusText").innerText = "Requesting network switch context...";try {await window.ethereum.request({method: 'wallet_switchEthereumChain',params: [{ chainId: OPN_CHAIN_ID }],});} catch (switchError) {if (switchError.code === 4902) {await window.ethereum.request({method: 'wallet_addEthereumChain',params: [{chainId: OPN_CHAIN_ID,chainName: 'OPN Chain Testnet',nativeCurrency: { name: 'OPN', symbol: 'OPN', decimals: 18 },rpcUrls: ['https://testnet-rpc.iopn.tech'],blockExplorerUrls: ['https://testnet-explorer.iopn.tech']}],});}}const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });const userAddress = accounts[0]; // Clean single array index string extractionconst shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38);document.getElementById("connectButton").innerText = shortAddress;document.getElementById("connectButton").style.backgroundColor = "var(--input-bg)";provider = new ethers.providers.Web3Provider(window.ethereum);signer = provider.getSigner();contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);document.getElementById("statusText").innerText = "Connected to OPN Testnet successfully!";} catch (error) {console.error(error);document.getElementById("statusText").innerText = "Connection rejected.";}} else {alert("Please install MetaMask wallet extension context!");}}// Deposit Call Processing Executionasync function depositToEscrow() {if(!contract) return alert("Please establish connected wallet session context!");try {const secret = document.getElementById("secretInput").value;const duration = document.getElementById("durationInput").value;if(!secret) return alert("Please supply secret parameters!");const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);const amount = ethers.utils.parseEther("0.1");const tx = await contract.depositToEscrow(commitment, duration, { value: amount });document.getElementById("statusText").innerText = "Broadcasting escrow payload to network block...";await tx.wait();document.getElementById("statusText").innerText = "0.1 OPN locked into smart contract successfully!";} catch (error) {alert("Transaction Execution Interrupted: " + error.message);}}// Claim Call Processing Payout Verification Logicasync function claimEscrow() {if(!contract) return alert("Please establish connected wallet session context!");try {const secret = document.getElementById("claimSecretInput").value;if(!secret) return alert("Please supply original secret key values!");const tx = await contract.claimEscrow(secret);document.getElementById("statusText").innerText = "Broadcasting claim signature to node...";await tx.wait();document.getElementById("statusText").innerText = "Collateral contract unlocked! Payout routed to wallet.";} catch (error) {alert("Claim Rejected by Node: " + error.message);}}// Standard Modal Architecture Alert Callback Triggersfunction runDeFiAlert(moduleName) {alert(OPN ${moduleName} terminal architecture is slated for release in Builder Ecosystem Season 2 / Phase 3. Currently, deployment validation scoring metrics accept the core Commit-Reveal Escrow matrix operations.);}
+                <div class="subtitle">Lock native $OPN tokens to accumulate smart reputation scoring values.</div>
+                <div class="input-group">
+                    <label>Staking Pool Matrix:</label>
+                    <select><option>Core Validator Pool (Estimated 14% APR)</option></select>
+                </div>
+                <div class="input-group">
+Staking Amount (OPN):Stake AssetsSystem Idle. Please connect wallet context.const OPN_CHAIN_ID = '0x3D8'; // Chain ID: 984 (Hex: 0x3D8)const CONTRACT_ADDRESS = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";const CONTRACT_ABI = ["function depositToEscrow(bytes32 _commitment, uint256 _duration) external payable","function claimEscrow(string calldata _secret) external","function getVaultDetails(bytes32 _commitment) external view returns (uint256 value, uint256 lockDuration, bool isLocked, bool isClaimed)"];let provider, signer, contract;function switchTab(tabName) {document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active'));document.getElementById(tab-${tabName}).classList.add('active');document.getElementById(panel-${tabName}).classList.add('active');}// 1. FIXED Core Wallet Connection Logic Matrixasync function connectWallet() {if (typeof window.ethereum !== 'undefined') {try {document.getElementById("statusText").innerText = "Requesting network switch context...";try {await window.ethereum.request({method: 'wallet_switchEthereumChain',params: [{ chainId: OPN_CHAIN_ID }],});} catch (switchError) {if (switchError.code === 4902) {await window.ethereum.request({method: 'wallet_addEthereumChain',params: [{chainId: OPN_CHAIN_ID,chainName: 'OPN Chain Testnet',nativeCurrency: { name: 'OPN', symbol: 'OPN', decimals: 18 },rpcUrls: ['iopn.tech'],blockExplorerUrls: ['iopn.tech']}],});}}const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });// FIXED: Properly extracting the first string item from the accounts array structure mappingconst userAddress = accounts[0];const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38);document.getElementById("connectButton").innerText = shortAddress;document.getElementById("connectButton").style.backgroundColor = "var(--input-bg)";provider = new ethers.providers.Web3Provider(window.ethereum);signer = provider.getSigner();contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);document.getElementById("statusText").innerText = "Connected to OPN Testnet successfully!";} catch (error) {console.error(error);document.getElementById("statusText").innerText = "Connection rejected.";}} else {alert("Please install MetaMask wallet extension context!");}}async function depositToEscrow() {if(!contract) return alert("Please establish connected wallet session context!");try {const secret = document.getElementById("secretInput").value;const duration = document.getElementById("durationInput").value;if(!secret) return alert("Please supply secret parameters!");const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);const amount = ethers.utils.parseEther("0.1");const tx = await contract.depositToEscrow(commitment, duration, { value: amount });document.getElementById("statusText").innerText = "Broadcasting escrow payload to network block...";await tx.wait();document.getElementById("statusText").innerText = "0.1 OPN locked into smart contract successfully!";} catch (error) {alert("Transaction Execution Interrupted: " + error.message);}}async function claimEscrow() {if(!contract) return alert("Please establish connected wallet session context!");try {const secret = document.getElementById("claimSecretInput").value;if(!secret) return alert("Please supply original secret key values!");const tx = await contract.claimEscrow(secret);document.getElementById("statusText").innerText = "Broadcasting claim signature to node...";await tx.wait();document.getElementById("statusText").innerText = "Collateral contract unlocked! Payout routed to wallet.";} catch (error) {alert("Claim Rejected by Node: " + error.message);}}function runDeFiAlert(moduleName) {alert(OPN ${moduleName} terminal architecture is slated for release in Builder Ecosystem Season 2 / Phase 3. Currently, deployment validation scoring metrics accept the core Commit-Reveal Escrow matrix operations.);}
