@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN ShieldEscrow & DeFi Terminal</title>
-    <!-- Verified Ethers.js library link -->
+    <!-- Core Web3 Library Integration Framework Script Provider -->
     <script src="https://jsdelivr.net"></script>
     <style>
         :root { --bg-color: #080b11; --card-bg: #111622; --input-bg: #181f30; --primary-blue: #0052ff; --primary-green: #00c853; --text-color: #ffffff; --text-muted: #707e94; --border-color: #1e2638; }
@@ -88,11 +88,12 @@
                     await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] }); 
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
                     
-                    // 100% FIXED: Exact string item extracted from accounts array using brackets mapping
+                    // FIXED: Accurately extracting the exact first address string item from accounts array using brackets mapping index sequence [0]
                     const userAddress = accounts[0]; 
-                    const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); 
                     
+                    const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); 
                     document.getElementById("connectButton").innerText = shortAddress; 
+                    
                     provider = new ethers.providers.Web3Provider(window.ethereum); 
                     signer = provider.getSigner(); 
                     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
@@ -137,5 +138,4 @@
             } 
         }
 
-        function runDeFiAlert(moduleName) { 
-alert(OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.);}
+function runDeFiAlert(moduleName) {alert(OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.);}
