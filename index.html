@@ -93,7 +93,6 @@
                     await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] }); 
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
                     
-                    // NEW STABLE PARSING: Accurately slicing address from indices 0 explicitly
                     const userAddress = accounts[0]; 
                     const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); 
                     
@@ -139,9 +138,10 @@
                 const tx = await contract.claimEscrow(secret); 
                 document.getElementById("statusText").innerText = "Broadcasting claim signature..."; 
                 await tx.wait(); 
-        document.getElementById("statusText").innerText = "Payout routed to wallet successfully!";
-    } catch (error) {
-        alert("Claim Failed: " + error.message);
+                document.getElementById("statusText").innerText = "Payout routed to wallet successfully!"; 
+                    } catch (error) {
+            alert("Claim Failed: " + error.message);
+        }
     }
 }
 
