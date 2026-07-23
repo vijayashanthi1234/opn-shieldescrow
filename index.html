@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN ShieldEscrow & DeFi Terminal</title>
-    <!-- Working Ethers.js library link -->
+    <!-- Core Web3 Integration Network Layer Provider Script -->
     <script src="https://jsdelivr.net"></script>
     <style>
         :root { --bg-color: #080b11; --card-bg: #111622; --input-bg: #181f30; --primary-blue: #0052ff; --primary-green: #00c853; --text-color: #ffffff; --text-muted: #707e94; --border-color: #1e2638; }
@@ -45,7 +45,7 @@
                 <h2>Commit-Reveal Escrow Vault</h2>
                 <div class="input-group"><label>Secret Word:</label><input type="text" id="secretInput" placeholder="Enter custom phrase string"></div>
                 <div class="input-group"><label>Lock Duration (Seconds):</label><input type="number" id="durationInput" value="86400"></div>
-                <button onclick="depositToEscrow()" class="submit-btn" style="margin-bottom: 25px;">Deposit 0.1 OPN to Escrow</button>
+                <button onclick="depositToEscrow()" class="submit-btn">Deposit 0.1 OPN to Escrow</button>
                 <h2>🔓 Claim Escrow Payout</h2>
                 <div class="input-group"><label>Original Secret Word:</label><input type="text" id="claimSecretInput" placeholder="Enter original password to reveal"></div>
                 <button onclick="claimEscrow()" class="submit-btn submit-btn-green">Reveal & Claim Payout</button>
@@ -74,13 +74,71 @@
         const OPN_CHAIN_ID = '0x3D8'; const CONTRACT_ADDRESS = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
         const CONTRACT_ABI = ["function depositToEscrow(bytes32 _commitment, uint256 _duration) external payable","function claimEscrow(string calldata _secret) external","function getVaultDetails(bytes32 _commitment) external view returns (uint256 value, uint256 lockDuration, bool isLocked, bool isClaimed)"];
         let provider, signer, contract;
-        function switchTab(tabName) { document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active')); document.getElementById(`tab-${tabName}`).classList.add('active'); document.getElementById(`panel-${tabName}`).classList.add('active'); }
-        async function connectWallet() { if (typeof window.ethereum !== 'undefined') { try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] }); const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-        const userAddress = accounts[0]; // FIXED: Accessing the first index of the array object safely
-        const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); document.getElementById("connectButton").innerText = shortAddress; provider = new ethers.providers.Web3Provider(window.ethereum); signer = provider.getSigner(); contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); document.getElementById("statusText").innerText = "Connected to OPN Testnet successfully!"; } catch (error) { console.error(error); document.getElementById("statusText").innerText = "Connection failed."; } } else { alert("Please install MetaMask!"); } }
-        async function depositToEscrow() { if(!contract) return alert("Please connect wallet first!"); try { const secret = document.getElementById("secretInput").value; const duration = document.getElementById("durationInput").value; if(!secret) return alert("Please enter secret!"); const commitment = ethers.utils.solidityKeccak256(["string"], [secret]); const amount = ethers.utils.parseEther("0.1"); const tx = await contract.depositToEscrow(commitment, duration, { value: amount }); document.getElementById("statusText").innerText = "Broadcasting escrow payload..."; await tx.wait(); document.getElementById("statusText").innerText = "0.1 OPN locked successfully!"; } catch (error) { alert("Error: " + error.message); } }
-        async function claimEscrow() { if(!contract) return alert("Please connect wallet first!"); try { const secret = document.getElementById("claimSecretInput").value; if(!secret) return alert("Please enter secret word!"); const tx = await contract.claimEscrow(secret); document.getElementById("statusText").innerText = "Broadcasting claim signature..."; await tx.wait(); document.getElementById("statusText").innerText = "Payout routed to wallet successfully!"; } catch (error) { alert("Claim Failed: " + error.message); } }
-        function runDeFiAlert(moduleName) { alert(`OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.`); }
-    </script>
-</body>
-</html>
+
+        function switchTab(tabName) { 
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); 
+            document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active')); 
+            document.getElementById(`tab-${tabName}`).classList.add('active'); 
+            document.getElementById(`panel-${tabName}`).classList.add('active'); 
+        }
+
+        async function connectWallet() { 
+            if (typeof window.ethereum !== 'undefined') { 
+                try { 
+                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] }); 
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
+                    
+                    // 100% FIXED: Using correct array bracket positioning mapping context
+                    const userAddress = accounts[0]; 
+                    const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); 
+                    
+                    document.getElementById("connectButton").innerText = shortAddress; 
+                    provider = new ethers.providers.Web3Provider(window.ethereum); 
+                    signer = provider.getSigner(); 
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); 
+                    document.getElementById("statusText").innerText = "Connected to OPN Testnet successfully!"; 
+                    document.getElementById("statusText").style.color = "#00c853";
+                } catch (error) { 
+                    console.error(error); 
+                    document.getElementById("statusText").innerText = "Connection failed."; 
+                    document.getElementById("statusText").style.color = "#ff3333";
+                } 
+            } else { 
+                alert("Please install MetaMask!"); 
+            } 
+        }
+
+        async function depositToEscrow() { 
+            if(!contract) return alert("Please connect wallet first!"); 
+            try { 
+                const secret = document.getElementById("secretInput").value; 
+                const duration = document.getElementById("durationInput").value; 
+                if(!secret) return alert("Please enter secret!"); 
+                const commitment = ethers.utils.solidityKeccak256(["string"], [secret]); 
+                const amount = ethers.utils.parseEther("0.1"); 
+                const tx = await contract.depositToEscrow(commitment, duration, { value: amount }); 
+                document.getElementById("statusText").innerText = "Broadcasting escrow payload..."; 
+                await tx.wait(); 
+                document.getElementById("statusText").innerText = "0.1 OPN locked successfully!"; 
+            } catch (error) { 
+                alert("Error: " + error.message); 
+            } 
+        }
+
+        async function claimEscrow() { 
+            if(!contract) return alert("Please connect wallet first!"); 
+            try { 
+                const secret = document.getElementById("claimSecretInput").value; 
+                if(!secret) return alert("Please enter secret word!"); 
+                const tx = await contract.claimEscrow(secret); 
+                document.getElementById("statusText").innerText = "Broadcasting claim signature..."; 
+                await tx.wait(); 
+                document.getElementById("statusText").innerText = "Payout routed to wallet successfully!"; 
+            } catch (error) { 
+        alert("Claim Failed: " + error.message);
+    }
+}
+
+function runDeFiAlert(moduleName) { 
+    alert(`OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.`); 
+}
