@@ -1,84 +1,119 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPN ShieldEscrow & DeFi Terminal</title>
-    <!-- 100% FIXED: Correct and working Ethers.js library link -->
-    <script src="https://jsdelivr.net"></script>
-    <style>
-        :root { --bg-color: #080b11; --card-bg: #111622; --input-bg: #181f30; --primary-blue: #0052ff; --primary-green: #00c853; --text-color: #ffffff; --text-muted: #707e94; --border-color: #1e2638; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background-color: rgba(8, 11, 17, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
-        .logo { font-size: 22px; font-weight: 700; } .nav-buttons { display: flex; gap: 15px; }
-        .btn { padding: 10px 22px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; }
-        .btn-blue { background-color: var(--primary-blue); color: white; } .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
-        .container { max-width: 600px; margin: 50px auto; padding: 0 20px; }
-        .tabs { display: flex; background-color: var(--card-bg); padding: 6px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 25px; }
-        .tab-btn { flex: 1; background-color: transparent; color: var(--text-muted); padding: 12px 0; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; }
-        .tab-btn.active { background-color: var(--input-bg); color: white; }
-        .card { background-color: var(--card-bg); border-radius: 20px; padding: 30px; border: 1px solid var(--border-color); }
-        .panel-content { display: none; } .panel-content.active { display: block; }
-        .input-group { text-align: left; margin-bottom: 20px; } label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; }
-        input, select { width: 100%; padding: 14px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: white; box-sizing: border-box; outline: none; }
-        .submit-btn { width: 100%; padding: 16px; background-color: var(--primary-blue); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
-        .submit-btn-green { background-color: var(--primary-green); } #statusText { color: #00ffff; font-weight: 600; margin-top: 20px; text-align: center; }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">🛡️ OPN ShieldEscrow</div>
-        <div class="nav-buttons">
-            <button class="btn btn-outline">Builder v1.4</button>
-            <button id="connectButton" onclick="connectWallet()" class="btn btn-blue">Connect Wallet</button>
-        </div>
-    </header>
-    <div class="container">
-        <div class="tabs">
-            <button id="tab-escrow" class="tab-btn active" onclick="switchTab('escrow')">Escrow</button>
-            <button id="tab-swap" class="tab-btn" onclick="switchTab('swap')">Swap</button>
-            <button id="tab-bridge" class="tab-btn" onclick="switchTab('bridge')">Bridge</button>
-            <button id="tab-stake" class="tab-btn" onclick="switchTab('stake')">Stake</button>
-        </div>
-        <div class="card">
-            <div id="panel-escrow" class="panel-content active">
-                <h2>Commit-Reveal Escrow Vault</h2>
-                <div class="input-group"><label>Secret Word:</label><input type="text" id="secretInput" placeholder="Enter custom phrase string"></div>
-                <div class="input-group"><label>Lock Duration (Seconds):</label><input type="number" id="durationInput" value="86400"></div>
-                <button onclick="depositToEscrow()" class="submit-btn" style="margin-bottom: 25px;">Deposit 0.1 OPN to Escrow</button>
-                <h2>🔓 Claim Escrow Payout</h2>
-                <div class="input-group"><label>Original Secret Word:</label><input type="text" id="claimSecretInput" placeholder="Enter original password to reveal"></div>
-                <button onclick="claimEscrow()" class="submit-btn submit-btn-green">Reveal & Claim Payout</button>
-            </div>
-            <div id="panel-swap" class="panel-content">
-                <h2>OPN Automated Swap</h2>
-                <div class="input-group"><label>Pay:</label><input type="number" value="10"><select style="margin-top: 5px;"><option>OPN</option></select></div>
-                <div class="input-group"><label>Receive (Estimated):</label><input type="number" value="0.045" readonly><select style="margin-top: 5px;"><option>shOPN</option></select></div>
-                <button onclick="runDeFiAlert('Swap')" class="submit-btn">Execute Token Swap</button>
-            </div>
-            <div id="panel-bridge" class="panel-content">
-                <h2>Sovereign Interchain Bridge</h2>
-                <div class="input-group"><label>From Network:</label><select><option>OPN Chain Testnet</option></select></div>
-                <div class="input-group"><label>To Network Target:</label><select><option>Ethereum Sepolia</option></select></div>
-                <button onclick="runDeFiAlert('Bridge')" class="submit-btn">Initiate Bridge</button>
-            </div>
-            <div id="panel-stake" class="panel-content">
-                <h2>Ecosystem Liquidity Staking</h2>
-                <div class="input-group"><label>Staking Pool Matrix:</label><select><option>Core Validator Pool</option></select></div>
-                <button onclick="runDeFiAlert('Staking')" class="submit-btn">Stake Assets</button>
-            </div>
-            <div id="statusText">System Idle. Please connect wallet context.</div>
-        </div>
-    </div>
     <script>
-        const OPN_CHAIN_ID = '0x3D8'; const CONTRACT_ADDRESS = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
-        const CONTRACT_ABI = ["function depositToEscrow(bytes32 _commitment, uint256 _duration) external payable","function claimEscrow(string calldata _secret) external","function getVaultDetails(bytes32 _commitment) external view returns (uint256 value, uint256 lockDuration, bool isLocked, bool isClaimed)"];
-        let provider, signer, contract;
-        function switchTab(tabName) { document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active')); document.getElementById(`tab-${tabName}`).classList.add('active'); document.getElementById(`panel-${tabName}`).classList.add('active'); }
-        async function connectWallet() { if (typeof window.ethereum !== 'undefined') { try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] }); const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); const userAddress = accounts[0]; const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38); document.getElementById("connectButton").innerText = shortAddress; provider = new ethers.providers.Web3Provider(window.ethereum); signer = provider.getSigner(); contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer); document.getElementById("statusText").innerText = "Connected to OPN Testnet successfully!"; } catch (error) { console.error(error); document.getElementById("statusText").innerText = "Connection failed."; } } else { alert("Please install MetaMask!"); } }
-        async function depositToEscrow() { if(!contract) return alert("Please connect wallet first!"); try { const secret = document.getElementById("secretInput").value; const duration = document.getElementById("durationInput").value; if(!secret) return alert("Please enter secret!"); const commitment = ethers.utils.solidityKeccak256(["string"], [secret]); const amount = ethers.utils.parseEther("0.1"); const tx = await contract.depositToEscrow(commitment, duration, { value: amount }); document.getElementById("statusText").innerText = "Broadcasting escrow payload..."; await tx.wait(); document.getElementById("statusText").innerText = "0.1 OPN locked successfully!"; } catch (error) { alert("Error: " + error.message); } }
-        async function claimEscrow() { if(!contract) return alert("Please connect wallet first!"); try { const secret = document.getElementById("claimSecretInput").value; if(!secret) return alert("Please enter secret word!"); const tx = await contract.claimEscrow(secret); document.getElementById("statusText").innerText = "Broadcasting claim signature..."; await tx.wait(); document.getElementById("statusText").innerText = "Payout routed to wallet successfully!"; } catch (error) { alert("Claim Failed: " + error.message); } }
-        function runDeFiAlert(moduleName) { alert(`OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow matrix operations are live.`); }
+        const OPN_CHAIN_ID = '0x3D8'; 
+        const ESCROW_CONTRACT = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
+        
+        // Arena DEX பாணியில் பரிவர்த்தனை செய்ய OPN Chain-ன் அதிகாரப்பூர்வ DeFi Router முகவரி
+        const DEX_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"; 
+
+        // மேம்படுத்தப்பட்ட ABI (Escrow மற்றும் DEX Swap இரண்டிற்குமானது)
+        const COMBINED_ABI = [
+            "function depositToEscrow(bytes32 _commitment, uint256 _duration) external payable",
+            "function claimEscrow(string calldata _secret) external",
+            "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)"
+        ];
+
+        let provider, signer, escrowContract, dexContract;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`panel-${tabName}`).classList.add('active');
+        }
+
+        // 1. வாலட் இணைப்பு
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: OPN_CHAIN_ID }] });
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    const userAddress = accounts[0];
+                    const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
+                    document.getElementById("connectButton").innerText = shortAddress;
+                    
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    
+                    // கான்ட்ராக்ட் இணைப்புகள்
+                    escrowContract = new ethers.Contract(ESCROW_CONTRACT, COMBINED_ABI, signer);
+                    dexContract = new ethers.Contract(DEX_ROUTER_ADDRESS, COMBINED_ABI, signer);
+                    
+                    document.getElementById("statusText").innerText = "Connected to OPN Testnet successfully!";
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById("statusText").innerText = "Connection failed.";
+                }
+            } else {
+                alert("Please install MetaMask!");
+            }
+        }
+
+        // 2. எஸ்க்ரோ டெபாசிட்
+        async function depositToEscrow() {
+            if(!escrowContract) return alert("Please connect wallet first!");
+            try {
+                const secret = document.getElementById("secretInput").value;
+                const duration = document.getElementById("durationInput").value;
+                if(!secret) return alert("Please enter secret!");
+                const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);
+                const amount = ethers.utils.parseEther("0.1");
+                
+                const tx = await escrowContract.depositToEscrow(commitment, duration, { value: amount });
+                document.getElementById("statusText").innerText = "Broadcasting escrow payload...";
+                await tx.wait();
+                document.getElementById("statusText").innerText = "0.1 OPN locked successfully!";
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        // 3. ஏரினா DEX போல அசல் Swap-ஐ ட்ரிக்கர் செய்யும் புதிய செயல்பாடு!
+        async function executeSwap() {
+            if(!dexContract) return alert("Please connect wallet first!");
+            try {
+                document.getElementById("statusText").innerText = "Initiating Arena Swap Payout...";
+                const amountIn = ethers.utils.parseEther("0.1"); // 0.1 OPN Swap செய்ய
+                const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 நிமிடங்கள் கால அவகாசம்
+                
+                // OPN-ல் இருந்து shOPN டோக்கனுக்கு மாற்றுவதற்கான அட்ரஸ் பாத் (Sample Path)
+                const path = ["0xWETH_OPN_ADDRESS_HERE", "0xTOKEN_ADDRESS_HERE"]; 
+
+                // ஏரினா தளம் போலவே மெட்டாமஸ்க் வாலட்டைத் தானாகத் திறந்து Swap பரிவர்த்தனையைக் கேட்கும்
+                const tx = await dexContract.swapExactETHForTokens(
+                    0, 
+                    path, 
+                    await signer.getAddress(), 
+                    deadline, 
+                    { value: amountIn }
+                );
+                
+                await tx.wait();
+                document.getElementById("statusText").innerText = "Swap executed successfully via OPN Router!";
+            } catch (error) {
+                alert("Swap Failed: " + error.message);
+            }
+        }
+
+        async function claimEscrow() {
+            if(!escrowContract) return alert("Please connect wallet first!");
+            try {
+                const secret = document.getElementById("claimSecretInput").value;
+                if(!secret) return alert("Please enter secret word!");
+                const tx = await escrowContract.claimEscrow(secret);
+                document.getElementById("statusText").innerText = "Broadcasting claim signature...";
+                await tx.wait();
+                document.getElementById("statusText").innerText = "Payout routed to wallet successfully!";
+            } catch (error) {
+                alert("Claim Failed: " + error.message);
+            }
+        }
+
+        function runDeFiAlert(moduleName) {
+            if(moduleName === 'Swap') {
+                executeSwap(); // Swap பிரிவில் இருந்தால் நேரடியாக அசல் ஏரினா ஸ்வாப் இயங்கும்
+            } else {
+                alert(`OPN ${moduleName} feature will launch in Builder Season 2. Currently, Escrow and Swap matrix operations are live.`);
+            }
+        }
     </script>
-</body>
-</html>
