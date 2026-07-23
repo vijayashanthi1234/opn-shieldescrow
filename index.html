@@ -278,7 +278,6 @@
 
     </div>
 
-    <!-- FIXED Script Wrapper Included Below -->
     <script>
         const OPN_CHAIN_ID = '0x3D8'; // Chain ID: 984 (Hex: 0x3D8)
         const CONTRACT_ADDRESS = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
@@ -294,6 +293,7 @@
         async function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
+                    // Try switching to OPN Chain Testnet automatically
                     try {
                         await window.ethereum.request({
                             method: 'wallet_switchEthereumChain',
@@ -315,7 +315,7 @@
                     }
 
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    const userAddress = accounts[0];
+                    // FIXED: Extracted single first string item from the accounts array object mapping
+                    const userAddress = accounts[0]; 
                     
-                    const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38);
-document.getElementById("connectButton").innerText = "Connected: " + shortAddress;document.getElementById("connectButton").style.backgroundColor = "#1c2231";provider = new ethers.providers.Web3Provider(window.ethereum);signer = provider.getSigner();contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);document.getElementById("statusText").innerText = "Wallet successfully connected to OPN Chain Testnet!";} catch (error) {console.error(error);alert("Wallet connection rejected by user.");}} else {alert("Please install MetaMask extension!");}}async function depositToEscrow() {if(!contract) return alert("Please connect your wallet first!");try {const secret = document.getElementById("secretInput").value;const duration = document.getElementById("durationInput").value;if(!secret) return alert("Please enter a secret word!");const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);const amount = ethers.utils.parseEther("0.1");const tx = await contract.depositToEscrow(commitment, duration, { value: amount });document.getElementById("statusText").innerText = "Transaction pending on OPN Chain...";await tx.wait();document.getElementById("statusText").innerText = "0.1 OPN successfully locked into escrow vault!";} catch (error) {alert("Transaction Error: " + error.message);}}async function claimEscrow() {if(!contract) return alert("Please connect your wallet first!");try {const secret = document.getElementById("claimSecretInput").value;if(!secret) return alert("Please enter the original secret word to claim!");const tx = await contract.claimEscrow(secret);document.getElementById("statusText").innerText = "Executing claim on OPN Chain...";await tx.wait();document.getElementById("statusText").innerText = "Collateral unlocked! Payout transferred to your wallet.";} catch (error) {alert("Claim Failed: " + error.message);}}function runDeFiAlert(featureName) {alert("OPN " + featureName + " feature will launch in Builder Program Phase 3 / Season 2. Currently, only the Escrow Terminal is live for validation.");}
+const shortAddress = userAddress.substring(0, 6) + "..." + userAddress.substring(38);document.getElementById("connectButton").innerText = "Connected: " + shortAddress;document.getElementById("connectButton").style.backgroundColor = "#1c2231";provider = new ethers.providers.Web3Provider(window.ethereum);signer = provider.getSigner();contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);document.getElementById("statusText").innerText = "Wallet successfully connected to OPN Chain Testnet!";} catch (error) {console.error(error);alert("Wallet connection rejected by user.");}} else {alert("Please install MetaMask extension!");}}async function depositToEscrow() {if(!contract) return alert("Please connect your wallet first!");try {const secret = document.getElementById("secretInput").value;const duration = document.getElementById("durationInput").value;if(!secret) return alert("Please enter a secret word!");const commitment = ethers.utils.solidityKeccak256(["string"], [secret]);const amount = ethers.utils.parseEther("0.1");const tx = await contract.depositToEscrow(commitment, duration, { value: amount });document.getElementById("statusText").innerText = "Transaction pending on OPN Chain...";await tx.wait();document.getElementById("statusText").innerText = "0.1 OPN successfully locked into escrow vault!";} catch (error) {alert("Transaction Error: " + error.message);}}async function claimEscrow() {if(!contract) return alert("Please connect your wallet first!");try {const secret = document.getElementById("claimSecretInput").value;if(!secret) return alert("Please enter the original secret word to claim!");const tx = await contract.claimEscrow(secret);document.getElementById("statusText").innerText = "Executing claim on OPN Chain...";await tx.wait();document.getElementById("statusText").innerText = "Collateral unlocked! Payout transferred to your wallet.";} catch (error) {alert("Claim Failed: " + error.message);}}function runDeFiAlert(featureName) {alert("OPN " + featureName + " feature will launch in Builder Program Phase 3 / Season 2. Currently, only the Escrow Terminal is live for validation.");}
