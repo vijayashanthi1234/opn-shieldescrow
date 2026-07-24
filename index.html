@@ -159,24 +159,29 @@
     }
 
     async function connectWallet() {
-        if (!window.ethereum) {
-            setStatus("MetaMask is not installed!", "error");
-            return;
-        }
-        try {
-            setStatus("Connecting wallet...", "loading");
+    if (!window.ethereum) {
+        setStatus("MetaMask is not installed! Please install MetaMask extension.", "error");
+        alert("தயவுசெய்து உங்கள் பிரவுசரில் MetaMask Extension இன்ஸ்டால் செய்யப்பட்டுள்ளதா என்று பாருங்கள்!");
+        return;
+    }
+    try {
+        setStatus("Connecting wallet...", "loading");
         provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         const address = await signer.getAddress();
+        
         document.getElementById("connectBtn").innerText = address.substring(0, 6) + "..." + address.substring(38);
         escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
+        
         document.getElementById("depositBtn").disabled = false;
         document.getElementById("claimBtn").disabled = false;
+
         chainDot.className = "dot green";
         chainText.innerText = "Connected to OPN Testnet";
         setStatus("Wallet connected successfully!", "success");
     } catch (err) {
+        console.error("Wallet connection error:", err);
         setStatus("Connection failed: " + err.message, "error");
     }
 }
