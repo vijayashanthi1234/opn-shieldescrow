@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPN ShieldEscrow & DeFi Terminal</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://jsdelivr.net"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --bg: #080b11; --card: #111622; --input: #181f30; --blue: #0052ff; --green: #00c853; --text: #fff; --muted: #707e94; --border: #1e2638; }
@@ -117,355 +117,21 @@
         <!-- ====== STAKE PANEL ====== -->
         <div id="panel-stake" class="panel">
             <h2>💰 Ecosystem Liquidity Staking</h2>
-            <div class="input-group"><label>Staking Pool Matrix</label><select><option>Core Validator Pool</option></select></div>
+            <div class="input-group">
+                <label>Staking Amount</label>
+                <input type="number" value="100" placeholder="Minimum 10 OPN">
+            </div>
             <button onclick="runDeFiAlert('Staking')" class="submit-btn blue">Stake Assets</button>
         </div>
-
-        <!-- ====== STATUS BAR ====== -->
-        <div id="statusBar">🔌 Click <strong>"Connect Wallet"</strong> to get started</div>
-        <div id="chainInfo" class="chain-info" style="display:none;">
-            <span class="dot" id="chainDot"></span>
-            <span id="chainText">Not connected</span>
-        </div>
+        
+        <div id="statusBar">🔌 Click "Connect Wallet" to get started</div>
+        <div class="chain-info"><span id="chainDot" class="dot red"></span> <span id="chainText">Not connected</span></div>
     </div>
 </div>
 
 <script>
-// ============================================================
-// 🎯 CONFIGURATION — EDIT THESE VALUES
-// ============================================================
-const CONFIG = {
-    // OPN Testnet Chain ID (hex)
-    chainId: '0x3D8',
-    // ⚠️ IMPORTANT: Replace with the REAL OPN Testnet RPC URL
-    rpcUrl: 'https://opn-testnet.rpc.url',
-    // ⚠️ IMPORTANT: Replace with the REAL OPN Testnet explorer URL
-    explorerUrl: 'https://opn-testnet.explorer.url',
-    chainName: 'OPN Testnet',
-    currencyName: 'OPN',
-    currencySymbol: 'OPN',
-    decimals: 18,
-    // Escrow contract address
-    contractAddress: '0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A',
-    contractAbi: [
-        "function depositToEscrow(bytes32 _commitment, uint256 _duration) external payable",
-        "function claimEscrow(string calldata _secret) external",
-        "function getVaultDetails(bytes32 _commitment) external view returns (uint256 value, uint256 lockDuration, bool isLocked, bool isClaimed)"
-    ]
-};
-
-// ============================================================
-// 🔧 STATE
-// ============================================================
-let provider = null;
-let signer = null;
-let contract = null;
-let userAddress = null;
-let isConnected = false;
-
-// ============================================================
-// 📋 UI HELPERS
-// ============================================================
-function $(id) { return document.getElementById(id); }
-
-function setStatus(msg, type = 'info') {
-    const bar = $('statusBar');
-    bar.textContent = msg;
-    bar.className = type;
-}
-
-function setStatusHTML(html, type = 'info') {
-    const bar = $('statusBar');
-    bar.innerHTML = html;
-    bar.className = type;
-}
-
-function setButtonsEnabled(enabled) {
-    $('depositBtn').disabled = !enabled;
-    $('claimBtn').disabled = !enabled;
-}
-
-function updateChainInfo(connected, networkName = '') {
-    const info = $('chainInfo');
-    const dot = $('chainDot');
-    const text = $('chainText');
-    if (connected) {
-        info.style.display = 'flex';
-        dot.className = 'dot green';
-        text.textContent = `✅ Connected to ${networkName || 'OPN Testnet'}`;
-    } else {
-        info.style.display = 'flex';
-        dot.className = 'dot red';
-        text.textContent = '🔴 Not connected';
-    }
-}
-
-function shortAddress(addr) {
-    if (!addr) return '';
-    return addr.slice(0, 6) + '...' + addr.slice(-4);
-}
-
-// ============================================================
-// 🔄 TAB SWITCHING
-// ============================================================
-function switchTab(name) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelector(`.tab-btn[onclick*="${name}"]`).classList.add('active');
-    $(`panel-${name}`).classList.add('active');
-}
-
-// ============================================================
-// 🔗 WALLET CONNECTION (EVM / MetaMask)
-// ============================================================
-async function connectWallet() {
-    const btn = $('connectBtn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Connecting...';
-
-    // --- Step 1: Check wallet ---
-    if (typeof window.ethereum === 'undefined') {
-        setStatus('❌ No EVM wallet found! Please install MetaMask.', 'error');
-        btn.disabled = false;
-        btn.textContent = '🔗 Connect Wallet';
-        // Check if Solana wallet is detected
-        if (typeof window.solana !== 'undefined' || typeof window.solflare !== 'undefined') {
-            alert('🚨 You are using a Solana wallet (Phantom/Solflare).\n\nThis DApp requires MetaMask or another EVM-compatible wallet.\n\n👉 Please install MetaMask from https://metamask.io');
-        } else {
-            alert('🚨 Please install MetaMask to use this DApp!\n\n👉 https://metamask.io');
-        }
-        return;
-    }
-
-    try {
-        // --- Step 2: Switch to OPN chain ---
-        setStatus('⏳ Switching to OPN Testnet...', 'loading');
-        try {
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: CONFIG.chainId }]
-            });
-        } catch (switchErr) {
-            if (switchErr.code === 4902) {
-                // Chain not added — add it
-                setStatus('⏳ Adding OPN Testnet to MetaMask...', 'loading');
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: CONFIG.chainId,
-                        chainName: CONFIG.chainName,
-                        rpcUrls: [CONFIG.rpcUrl],
-                        nativeCurrency: {
-                            name: CONFIG.currencyName,
-                            symbol: CONFIG.currencySymbol,
-                            decimals: CONFIG.decimals
-                        },
-                        blockExplorerUrls: [CONFIG.explorerUrl]
-                    }]
-                });
-            } else {
-                throw switchErr;
-            }
-        }
-
-        // --- Step 3: Request accounts ---
-        setStatus('⏳ Requesting wallet access...', 'loading');
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        if (!accounts || accounts.length === 0) {
-            throw new Error('No accounts returned. Please unlock MetaMask.');
-        }
-
-        userAddress = accounts[0];
-        const shortAddr = shortAddress(userAddress);
-
-        // --- Step 4: Initialize ethers ---
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-
-        // --- Step 5: Check balance ---
-        const balanceWei = await provider.getBalance(userAddress);
-        const balanceEth = parseFloat(ethers.utils.formatEther(balanceWei));
-
-        // --- Step 6: Initialize contract ---
-        contract = new ethers.Contract(CONFIG.contractAddress, CONFIG.contractAbi, signer);
-
-        // --- Step 7: Verify contract exists ---
-        const code = await provider.getCode(CONFIG.contractAddress);
-        if (code === '0x' || code === '0x0') {
-            setStatus(`⚠️ Connected, but no contract found at ${CONFIG.contractAddress}`, 'warning');
-            updateChainInfo(true, CONFIG.chainName);
-            btn.textContent = shortAddr;
-            isConnected = true;
-            setButtonsEnabled(false);
-            btn.disabled = false;
-            return;
-        }
-
-        // --- Step 8: Success! ---
-        isConnected = true;
-        setButtonsEnabled(true);
-        btn.textContent = shortAddr;
-        btn.disabled = false;
-        updateChainInfo(true, CONFIG.chainName);
-
-        setStatusHTML(`✅ Connected! Balance: <strong>${balanceEth.toFixed(4)} OPN</strong>`, 'success');
-
-        // --- Listen for account/chain changes ---
-        window.ethereum.on('accountsChanged', (accts) => {
-            if (accts.length === 0) {
-                disconnectWallet();
-            } else {
-                userAddress = accts[0];
-                btn.textContent = shortAddress(userAddress);
-                setStatus('🔄 Account changed. Reconnecting...', 'loading');
-                connectWallet();
-            }
-        });
-        window.ethereum.on('chainChanged', () => {
-            setStatus('🔄 Network changed. Reconnecting...', 'loading');
-            setTimeout(() => connectWallet(), 1000);
-        });
-
-    } catch (err) {
-        console.error('Connection error:', err);
-        setStatus(`❌ ${err.message || 'Connection failed'}`, 'error');
-        isConnected = false;
-        contract = null;
-        setButtonsEnabled(false);
-        btn.disabled = false;
-        btn.textContent = '🔗 Connect Wallet';
-        updateChainInfo(false);
-    }
-}
-
-function disconnectWallet() {
-    isConnected = false;
-    contract = null;
-    provider = null;
-    signer = null;
-    userAddress = null;
-    $('connectBtn').textContent = '🔗 Connect Wallet';
-    $('connectBtn').disabled = false;
-    setButtonsEnabled(false);
-    setStatus('🔌 Disconnected. Click Connect Wallet.', 'info');
-    updateChainInfo(false);
-}
-
-// ============================================================
-// 💰 ESCROW OPERATIONS
-// ============================================================
-async function depositToEscrow() {
-    if (!contract || !isConnected) {
-        return alert('⚠️ Please connect your wallet first!');
-    }
-
-    const secret = $('secretInput').value.trim();
-    const duration = parseInt($('durationInput').value);
-
-    if (!secret) return alert('❌ Please enter a secret word!');
-    if (!duration || duration < 1) return alert('❌ Duration must be at least 1 second!');
-
-    const depositBtn = $('depositBtn');
-    depositBtn.disabled = true;
-    depositBtn.textContent = '⏳ Processing...';
-
-    try {
-        const commitment = ethers.utils.solidityKeccak256(['string'], [secret]);
-        const amount = ethers.utils.parseEther('0.1');
-
-        setStatus('⏳ Broadcasting deposit transaction...', 'loading');
-
-        const tx = await contract.depositToEscrow(commitment, duration, {
-            value: amount,
-            gasLimit: 300000
-        });
-
-        setStatusHTML(`⏳ Waiting for confirmation...<br><span class="tx-hash">Tx: ${tx.hash}</span>`, 'loading');
-
-        const receipt = await tx.wait();
-
-        setStatusHTML(`✅ <strong>0.1 OPN locked in escrow!</strong><br><span class="tx-hash">Tx: ${tx.hash}</span>`, 'success');
-        depositBtn.textContent = '✅ Deposited!';
-        setTimeout(() => { depositBtn.textContent = 'Deposit 0.1 OPN to Escrow'; depositBtn.disabled = false; }, 3000);
-
-    } catch (err) {
-        console.error('Deposit error:', err);
-        setStatus(`❌ Deposit failed: ${err.message}`, 'error');
-        depositBtn.textContent = 'Deposit 0.1 OPN to Escrow';
-        depositBtn.disabled = false;
-    }
-}
-
-async function claimEscrow() {
-    if (!contract || !isConnected) {
-        return alert('⚠️ Please connect your wallet first!');
-    }
-
-    const secret = $('claimSecretInput').value.trim();
-    if (!secret) return alert('❌ Please enter the original secret word!');
-
-    const claimBtn = $('claimBtn');
-    claimBtn.disabled = true;
-    claimBtn.textContent = '⏳ Processing...';
-
-    try {
-        setStatus('⏳ Broadcasting claim transaction...', 'loading');
-
-        const tx = await contract.claimEscrow(secret, { gasLimit: 200000 });
-
-        setStatusHTML(`⏳ Waiting for confirmation...<br><span class="tx-hash">Tx: ${tx.hash}</span>`, 'loading');
-
-        const receipt = await tx.wait();
-
-        setStatusHTML(`✅ <strong>Payout claimed successfully!</strong><br><span class="tx-hash">Tx: ${tx.hash}</span>`, 'success');
-        claimBtn.textContent = '✅ Claimed!';
-        setTimeout(() => { claimBtn.textContent = 'Reveal & Claim Payout'; claimBtn.disabled = false; }, 3000);
-
-    } catch (err) {
-        console.error('Claim error:', err);
-        setStatus(`❌ Claim failed: ${err.message}`, 'error');
-        claimBtn.textContent = 'Reveal & Claim Payout';
-        claimBtn.disabled = false;
-    }
-}
-
-// ============================================================
-// 🚀 PLACEHOLDER FOR SWAP/BRIDGE/STAKE
-// ============================================================
-function runDeFiAlert(name) {
-    alert(`🚀 OPN ${name} will launch in Builder Season 2. Currently, Escrow is live.`);
-}
-
-// ============================================================
-// ⏱️ AUTO-DETECT ON LOAD
-// ============================================================
-window.addEventListener('load', () => {
-    if (typeof window.ethereum !== 'undefined') {
-        setStatus('💡 MetaMask detected! Click "Connect Wallet" above.', 'info');
-        // Auto-reconnect if already connected
-        window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
-            if (accounts && accounts.length > 0) {
-                connectWallet();
-            }
-        }).catch(() => {});
-    } else {
-        setStatus('💡 No EVM wallet detected. Install MetaMask to use this DApp.', 'warning');
-    }
-});
-</script>
-</body>
-</html>
-    <!-- முந்தைய ஸ்டேக்கிங் பேனல் மற்றும் பிற HTML கோடுகளுக்குக் கீழே, இதைப் பொருத்தவும் -->
-    
-    <div id="statusBar">🔌 Click **"Connect Wallet"** to get started</div>
-    <div class="chain-info"><span id="chainDot" class="dot red"></span> <span id="chainText">Not connected</span></div>
-</div> <!-- கன்டெய்னர் முடிவு -->
-
-<script>
-    // 1. உங்கள் புதிய OPN டெஸ்ட்நெட் கான்ட்ராக்ட் முகவரி
     const contractAddress = "0xa0772b29afBc2538DDfF58Ae72DA61Ab4725536A";
 
-    // 2. உங்களுடைய ShieldEscrow ஸ்மார்ட் கான்ட்ராக்ட் ABI
     const contractABI = [
         "function deposit(bytes32 secretHash) public payable",
         "function claimPayout(string memory secretWord) public",
@@ -488,11 +154,10 @@ window.addEventListener('load', () => {
     function switchTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        event.target.classList.add('active');
+        event.currentTarget.classList.add('active');
         document.getElementById('panel-' + tabId).classList.add('active');
     }
 
-    // வேலட் இணைக்கும் செயல்பாடு (Wallet Connection)
     async function connectWallet() {
         if (!window.ethereum) {
             setStatus("MetaMask is not installed!", "error");
@@ -500,70 +165,56 @@ window.addEventListener('load', () => {
         }
         try {
             setStatus("Connecting wallet...", "loading");
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            signer = provider.getSigner();
-            const address = await signer.getAddress();
-            
-            document.getElementById("connectBtn").innerText = address.substring(0, 6) + "..." + address.substring(38);
-            escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
-            
-            document.getElementById("depositBtn").disabled = false;
-            document.getElementById("claimBtn").disabled = false;
+provider = new ethers.providers.Web3Provider(window.ethereum);
+await provider.send("eth_requestAccounts", []);
+signer = provider.getSigner();
+const address = await signer.getAddress();
+document.getElementById("connectBtn").innerText = address.substring(0, 6) + "..." + address.substring(38);
+escrowContract = new ethers.Contract(contractAddress, contractABI, signer);
+document.getElementById("depositBtn").disabled = false;
+document.getElementById("claimBtn").disabled = false;
+chainDot.className = "dot green";
+chainText.innerText = "Connected to OPN Testnet";
+setStatus("Wallet connected successfully!", "success");
+} catch (err) {
+    setStatus("Connection failed: " + err.message, "error");
+}
+}
 
-            chainDot.className = "dot green";
-            chainText.innerText = "Connected to OPN Testnet";
-            setStatus("Wallet connected successfully!", "success");
-        } catch (err) {
-            setStatus("Connection failed: " + err.message, "error");
+async function depositToEscrow() {
+    const secret = document.getElementById("secretInput").value;
+    if (!secret) { setStatus("Enter a secret word!", "warning"); return; }
+    try {
+        setStatus("Processing deposit...", "loading");
+        const secretHash = ethers.utils.solidityKeccak256(["string"], [secret]);
+        const tx = await escrowContract.deposit(secretHash, { value: ethers.utils.parseEther("0.1") });
+        setStatus("Transaction pending...", "loading");
+        await tx.wait();
+        setStatus("0.1 OPN deposited successfully!", "success");
+    } catch (err) {
+        setStatus("Deposit failed: " + (err.reason || err.message), "error");
+    }
+}
+
+async function claimEscrow() {
+    const secret = document.getElementById("claimSecretInput").value;
+    if (!secret) { setStatus("Enter the original secret word!", "warning"); return; }
+    try {
+        setStatus("Submitting payout claim...", "loading");
+        const tx = await escrowContract.claimPayout(secret);
+        setStatus("Claim pending...", "loading");
+        await tx.wait();
+        setStatus("Payout claimed successfully!", "success");
+    } catch (err) {
+        console.error(err);
+        let errorReason = err.reason || (err.data && err.data.message) || err.message;
+        if (errorReason.includes("execution reverted") || errorReason.includes("CALL_EXCEPTION")) {
+            errorReason = "CALL_EXCEPTION: லாக் காலம் (Lock Duration) இன்னும் முடியவில்லை அல்லது ரகசிய வார்த்தை தவறு!";
         }
+        setStatus("Claim failed: " + errorReason, "error");
     }
+}
 
-    // டெபாசிட் லாஜிக் (Deposit Logic with Hashing)
-    async function depositToEscrow() {
-        const secret = document.getElementById("secretInput").value;
-        if (!secret) { setStatus("Enter a secret word!", "warning"); return; }
-        try {
-            setStatus("Processing deposit...", "loading");
-            
-            // ரகசிய வார்த்தையை keccak256 முறையில் ஹேஷ் செய்தல்
-            const secretHash = ethers.utils.solidityKeccak256(["string"], [secret]);
-            
-            const tx = await escrowContract.deposit(secretHash, { value: ethers.utils.parseEther("0.1") });
-            setStatus("Transaction pending...", "loading");
-            await tx.wait();
-            setStatus("0.1 OPN deposited successfully!", "success");
-        } catch (err) {
-            setStatus("Deposit failed: " + (err.reason || err.message), "error");
-        }
-    }
-
-    // கிளைம் லாஜிக் (Claim Logic with Error Catching)
-    async function claimEscrow() {
-        const secret = document.getElementById("claimSecretInput").value;
-        if (!secret) { setStatus("Enter the original secret word!", "warning"); return; }
-        try {
-            setStatus("Submitting payout claim...", "loading");
-            
-            // கான்ட்ராக்ட் ஃபங்ஷனை அழைத்தல்
-            const tx = await escrowContract.claimPayout(secret);
-            setStatus("Claim pending...", "loading");
-            await tx.wait();
-            setStatus("Payout claimed successfully!", "success");
-        } catch (err) {
-            console.error(err);
-            // துல்லியமான Solidity எர்ரர் மெசேஜைக் கண்டறிந்து காட்டுதல்
-            let errorReason = err.reason || (err.data && err.data.message) || err.message;
-            if (errorReason.includes("execution reverted")) {
-                errorReason = "CALL_EXCEPTION: லாக் காலம் இன்னும் முடியவில்லை அல்லது தவறான ரகசிய வார்த்தை!";
-            }
-            setStatus("Claim failed: " + errorReason, "error");
-        }
-    }
-
-    function runDeFiAlert(action) {
-        alert(action + " feature is a mock-up for DeFi Terminal UI testing!");
-    }
-</script>
-</body>
-</html>
+function runDeFiAlert(action) {
+    alert(action + " feature is a mock-up for DeFi Terminal UI testing!");
+}
